@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm *)", "Bash(npx *)", "Bash(git *)", "Bash(ls *)",
+      "Bash(mkdir *)", "Bash(node *)", "Bash(tsc *)", "Bash(jq *)",
+      "Read", "Edit", "Write", "Glob", "Grep"
+    ],
+    "deny": [
+      "Bash(rm -rf /)", "Bash(rm -rf ~)", "Bash(sudo *)",
+      "Read(.env*)", "Read(**/credentials*)", "Read(**/*secret*)"
+    ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/check-quality.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/check-careful.sh 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
+  }
+}

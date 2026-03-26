@@ -1,0 +1,34 @@
+# {{SERVICE_NAME}}
+
+## Overview
+- **Service**: {{SERVICE_NAME}}
+- **Type**: {{SERVICE_TYPE}}
+- **Mission**: {{MISSION}}
+- **Problem**: {{PROBLEM}}
+- **Target**: {{TARGET}}
+- **Differentiator**: {{DIFFERENTIATOR}}
+- **Model**: sonnet (default) / opus (architecture, RCA, deep analysis)
+
+## Tech Stack
+{{TECH_STACK}}
+
+## Team
+| Role | Agent | Model |
+|------|-------|-------|
+| {{TEAM_TABLE}} |
+
+## Quality Gates
+1. Build passes (`npm run build` or equivalent)
+2. No lint errors
+3. All existing tests pass
+4. New features have tests
+5. Bug fixes have reproduction test
+
+## Rules
+- Finish one thing 100% before starting the next
+- Questions to CEO: plain language, multiple choice only
+- Fix problems immediately. Report only what you can't fix.
+- Mock data first (Phase 1). Real APIs later (Phase 2).
+- Every feature must serve `.project/essence.md`
+- Same approach fails twice → root cause analysis
+- Reuse > library > build from scratch

@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"bash install.sh\",\"description\":\"Run installer from local repo directory\"}",
+  "error": "Exit code 1\n🏭 Installing idea-factory...\n   Cloning from GitHub...\n❌ Failed to clone. Install from local: cd idea-factory && bash install.sh",
+  "timestamp": "2026-03-26T10:50:15.648Z",
+  "retry_count": 2
+}
