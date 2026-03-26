@@ -17,6 +17,48 @@ You're the CEO — describe what you want in one line, and a team of AI agents b
 
 ---
 
+## Demo
+
+One command. A complete MVP in under an hour.
+
+```terminal
+$ claude
+> /start-company 프리랜서 수입 지출 자동 관리 앱
+
+[ANALYZE] analyst + architect analyzing in parallel...
+  → Service: CashFreel (캐시프릴)
+  → Type: SaaS — Freelancer tax prediction
+  → Team: PM + Developer + Designer
+
+[SCAFFOLD] Creating project from templates...
+  → CLAUDE.md, agents, hooks, settings ✓
+  → git init ✓
+
+[KICKOFF] CEO, 4 quick questions:
+  1. Design feel? → Toss style (minimal, big numbers)
+  2. MVP scope? → Tax prediction + income/expense tracking
+  3. Revenue? → Free first, decide later
+  4. Income scope? → Domestic + international
+
+[BUILD] ralph loop running MVP stories...
+  ✅ MVP-001: Next.js + Tailwind + shadcn/ui
+  ✅ MVP-002: Income registration (KRW + USD + EUR)
+  ✅ MVP-003: Expense tracking + auto-categorization
+  ✅ MVP-004: Real-time tax dashboard + charts
+  ✅ MVP-005: Cash flow report + CSV export
+
+[VALIDATE] 3 independent reviewers:
+  ✅ architect (opus): structure supports Phase 2
+  ✅ critic (opus): essence score 7.5/10
+  ✅ qa-tester: all 7 checks passed
+
+→ MVP complete. Phase 2 ready when you are.
+```
+
+**Result:** CashFreel now has a working prototype. Next phase: connect real tax APIs, add authentication, harden security. CEO didn't write a single line of code.
+
+---
+
 ## The Problem
 
 Vibe coding is fast, but chaotic. You get code — not a product.
