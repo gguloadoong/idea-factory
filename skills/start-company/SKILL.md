@@ -5,7 +5,7 @@ argument-hint: "[your idea in one line]"
 user_invocable: true
 ---
 
-# AI Company Factory v5
+# idea-factory
 
 You received a business idea. Build a virtual startup and deliver a working MVP.
 
