@@ -1,18 +1,7 @@
 ---
 name: "pm"
 description: "Product Manager. Owns PRD, backlog, sprint planning, and CEO communication."
-tools:
-  - Read
-  - Edit
-  - Write
-  - Glob
-  - Grep
-  - Bash
-  - Agent
-  - TaskCreate
-  - TaskUpdate
-  - TaskList
-  - WebSearch
+tools: Read, Edit, Write, Glob, Grep, Bash, Agent, TaskCreate, TaskUpdate, TaskList, WebSearch
 model: claude-sonnet-4-6
 maxTurns: 50
 ---

@@ -1,0 +1,19 @@
+# .protected-files — Files requiring architect review before changes
+#
+# List file paths or patterns (one per line).
+# Any change to these files triggers mandatory architect (opus) review.
+# run-architect.sh reads this file; create-pr.sh enforces the gate.
+#
+# Format:
+#   - One path or grep-compatible pattern per line
+#   - Lines starting with # are comments
+#   - Empty lines are ignored
+#   - Test/spec files are automatically excluded
+#
+# Examples:
+#   src/engine/
+#   src/utils/scoring.js
+#   src/hooks/useSignals.js
+#   api/core/
+#
+# Fill this file after Phase 1 when core business logic files are identified.

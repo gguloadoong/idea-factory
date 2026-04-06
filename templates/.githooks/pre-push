@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# .githooks/pre-push — Code-review artifact freshness warning
+# Generalized from market-dashboard-v5
+#
+# Soft warning only (does not block push).
+# Activate: git config core.hooksPath .githooks
+
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+# Skip main and non-feature branches
+if [[ "$BRANCH" == "main" ]]; then
+  exit 0
+fi
+
+SAFE_BRANCH="${BRANCH//\//-}"
+REVIEW_FILE=".tmp/code-review-${SAFE_BRANCH}.md"
+
+if [ ! -f "$REVIEW_FILE" ]; then
+  echo ""
+  echo "[pre-push] WARNING: code-review artifact missing: ${REVIEW_FILE}"
+  echo "  Run code-reviewer before creating PR"
+  echo ""
+  exit 0
+fi
+
+REVIEW_COMMIT=$(grep -oE 'commit: [a-f0-9]+' "$REVIEW_FILE" | awk '{print $2}' || echo "")
+HEAD_COMMIT=$(git rev-parse HEAD)
+
+if [ "$REVIEW_COMMIT" != "$HEAD_COMMIT" ]; then
+  echo ""
+  echo "[pre-push] WARNING: code-review is stale"
+  echo "  Review commit: ${REVIEW_COMMIT:-none}"
+  echo "  Current HEAD:  ${HEAD_COMMIT}"
+  echo "  Re-run code-reviewer before creating PR"
+  echo ""
+fi
+
+exit 0

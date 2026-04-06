@@ -1,0 +1,85 @@
+# {{SERVICE_NAME}} Quality Baseline
+
+> **Ratchet Rule:** This baseline only goes UP, never DOWN.
+> Once quality improves, it never regresses.
+> Violation detected -> P0 Issue -> all new work stops -> restore then update baseline.
+
+---
+
+## Build & Code Quality
+
+| Item | Current Baseline | Violation Priority |
+|------|-----------------|-------------------|
+| `npm run build` errors | TBD -- fill after Phase 2 | P0 |
+| Lint errors | TBD -- fill after Phase 2 | P1 |
+| `npm audit` critical/high | TBD -- fill after Phase 2 | P0 |
+| Bundle size (gzip) | TBD -- fill after Phase 2 | P2 |
+
+---
+
+## Tests
+
+| Item | Current Baseline | Violation Priority |
+|------|-----------------|-------------------|
+| Unit test count | TBD -- fill after Phase 2 | P1 |
+| Test pass rate | TBD -- fill after Phase 2 | P0 |
+| Critical path coverage | TBD -- fill after Phase 2 | P1 |
+
+---
+
+## Data Accuracy
+
+| Item | Current Baseline | Violation Priority |
+|------|-----------------|-------------------|
+| Primary data source response | TBD -- fill after Phase 2 | P0 |
+| Fallback chain depth | TBD -- fill after Phase 2 | P1 |
+| Data freshness threshold | TBD -- fill after Phase 2 | P1 |
+
+---
+
+## UI States
+
+| Item | Current Baseline | Violation Priority |
+|------|-----------------|-------------------|
+| Layout broken | TBD -- fill after Phase 2 | P0 |
+| Empty state UI | TBD -- fill after Phase 2 | P1 |
+| Mobile responsive | TBD -- fill after Phase 2 | P1 |
+| Error state display | TBD -- fill after Phase 2 | P1 |
+
+---
+
+## API & Fallback
+
+| Item | Current Baseline | Violation Priority |
+|------|-----------------|-------------------|
+| API timeout handling | TBD -- fill after Phase 2 | P1 |
+| Fallback chain | TBD -- fill after Phase 2 | P0 |
+| Error rate threshold | TBD -- fill after Phase 2 | P1 |
+
+---
+
+## Deploy
+
+| Item | Baseline |
+|------|----------|
+| Deploy method | GitHub main merge -> auto deploy only |
+| Manual CLI deploy | Forbidden |
+| Pre-deploy gate | pre-deploy-consensus.sh must PASS |
+
+---
+
+## PR Review
+
+| Stage | Method | Baseline |
+|-------|--------|----------|
+| 1 -- Independent review | code-reviewer (opus) | CRITICAL/HIGH = 0 |
+| 2 -- Codex gate | Codex CLI | BLOCK = 0 |
+| 3+ -- Bot reviews | Gemini/CodeRabbit/Copilot | Review and respond |
+
+---
+
+## Baseline History
+
+| Date | Change | Owner |
+|------|--------|-------|
+| (project creation) | Initial baseline (all TBD) | Team |

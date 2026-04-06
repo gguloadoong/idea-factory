@@ -1,0 +1,15 @@
+frontend:
+  - changed-files:
+    - any-glob-to-any-file: ['src/**', 'public/**', '*.css', '*.html']
+
+api:
+  - changed-files:
+    - any-glob-to-any-file: ['api/**', 'server/**']
+
+docs:
+  - changed-files:
+    - any-glob-to-any-file: ['**/*.md', '.github/**']
+
+config:
+  - changed-files:
+    - any-glob-to-any-file: ['*.config.*', '.env*', 'package.json', 'tsconfig*']

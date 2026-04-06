@@ -15,7 +15,7 @@
 ## Team
 | Role | Agent | Model |
 |------|-------|-------|
-| {{TEAM_TABLE}} |
+{{TEAM_TABLE}}
 
 ## Quality Gates
 1. Build passes (`npm run build` or equivalent)
@@ -23,6 +23,51 @@
 3. All existing tests pass
 4. New features have tests
 5. Bug fixes have reproduction test
+
+## Session Start (MUST read before doing anything)
+Every new session, read these files IN ORDER before writing any code:
+1. `.project/essence.md` — Why this product exists (direction compass)
+2. `.project/PRD.md` — What to build (current features and scope)
+3. `.project/backlog.md` — What's next (priority order)
+4. `.project/decisions.md` — What was already decided (don't re-decide)
+5. `.project/handoff/` — Latest handoff doc (what works, what doesn't, where we left off)
+6. `.project/checkpoint.md` — Last session summary (if exists)
+7. `src/CONTRACT.md` — Active and deleted components (prevent zombie files)
+
+If any of these don't exist yet, skip and move on.
+Touching a feature directory? Read its `*_CONTRACT.md` first.
+
+## Context Health Management
+**Auto-Compact (60% Rule):**
+- After every story completion, check context usage
+- 60% → `/compact Keep: essence, Phase, decisions, current story, bugs`
+- 80% → checkpoint.md 저장 + CEO에게 경고
+- 95% → STOP + 새 세션 필요. 95% 전에 반드시 compact할 것
+
+**Subagent Isolation (keep main context clean):**
+- Heavy work (test runs, file searches, code generation) → delegate to subagent
+- Subagent gets its own fresh context, returns summary only
+- Main session stays lightweight: direction, decisions, story management only
+
+**Checkpoint (every 10 stories or ~2 hours):**
+- Save to `.project/checkpoint.md`:
+  - What was done this session
+  - What's in progress (current story, blockers)
+  - Key decisions made
+  - Files changed
+  - Context health at time of save
+
+## AI Regression Prevention
+1. **Delete zombie files immediately** — When a component is deleted, delete the file. If the file stays, the next AI session will re-import it.
+2. **CONTRACT pattern** — Each feature directory has a `*_CONTRACT.md`: active list + permanently-deleted list (reason + why not to re-add).
+3. **Architecture tests** — Write a test that fails CI if a deleted component is imported.
+4. **Done = manually verified** — "Done" means verified with real data, not just checklist ticked.
+5. **Independent review before PR** — Pass diff to `code-reviewer` agent. Self-review in the same context is invalid.
+
+## Deployment Rules
+- Never merge PR immediately — batch merges per work unit → 1 deploy per unit
+- Vercel preview deploys disabled (vercel.json ignoreCommand)
+- Never run `vercel --prod` CLI manually
 
 ## Rules
 - Finish one thing 100% before starting the next

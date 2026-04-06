@@ -17,6 +17,25 @@ You're the CEO — describe what you want in one line, and a team of AI agents b
 
 ---
 
+## What's New in v6.1
+
+v6.1 is a major upgrade to the review pipeline and build safety, informed by [Anthropic's harness engineering research](https://www.anthropic.com/engineering/harness-design-long-running-apps) (March 2026).
+
+| Feature | What it does |
+|---------|-------------|
+| **4-Reviewer Gate** | architect + critic + code-reviewer + qa-tester review in parallel (was 3) |
+| **Fresh Context Isolation** | Every reviewer runs in an isolated worktree — no self-praise bias |
+| **Two-Pass Evaluation** | Pass 1: adversarial defect hunt (mandatory). Pass 2: structured scoring (optional, fresh context). Eliminates "Evaluator Leniency" |
+| **Playwright MCP** | qa-tester opens the live app in a real browser, clicks buttons, fills forms — not just code review |
+| **Phase Handoff Documents** | MVP, Harden, Ship phases produce handoff docs preserving context across transitions |
+| **Codex Gate** | Optional cross-model review via OpenAI Codex CLI for a second opinion on diffs |
+| **Safety Hooks** | `check-safety.sh` prevents secrets, large files, and debug artifacts from being committed |
+| **CLAUDE.md 80-Line Limit** | Generated project CLAUDE.md stays under 80 lines (HumanLayer research: compliance drops beyond ~150 instructions) |
+| **Fix-Loop Circuit Breaker** | Same failure 3 times = stop and escalate to CEO (no more infinite token-burning loops) |
+| **HARNESS-GUIDE.md** | New design document explaining every architectural decision with evidence |
+
+---
+
 ## Demo
 
 One command. A complete MVP in under an hour.
@@ -47,10 +66,11 @@ $ claude
   ✅ MVP-004: Real-time tax dashboard + charts
   ✅ MVP-005: Cash flow report + CSV export
 
-[VALIDATE] 3 independent reviewers:
-  ✅ architect (opus): structure supports Phase 2
-  ✅ critic (opus): essence score 7.5/10
-  ✅ qa-tester: all 7 checks passed
+[VALIDATE] 4 independent reviewers (isolated worktrees):
+  ✅ architect (opus): no structural blockers for Phase 2
+  ✅ critic (opus): no essence drift detected
+  ✅ code-reviewer (opus): 0 critical, 2 medium (non-blocking)
+  ✅ qa-tester (playwright): all 7 flows pass in real browser
 
 → MVP complete. Phase 2 ready when you are.
 ```
@@ -111,9 +131,9 @@ You: /start-company a portfolio tracker for busy investors
   BUILD MVP ────── Mock data first. Core flow only.
      │              Every feature checked: "Does this serve the Why?"
      ▼
-  VALIDATE ─────── 3 independent reviewers in parallel:
-     │              Architect (structure) + Critic (essence) + QA (function)
-     │              ↳ fail? fix and retry. pass? CEO confirms direction.
+  VALIDATE ─────── 4 reviewers in isolated worktrees (defects first):
+     │              Architect + Critic + Code-Reviewer + QA (Playwright)
+     │              ↳ critical defect? fix and retry. all clear? CEO confirms.
      ▼
   HARDEN ──────── Real APIs, tests, security — only after MVP is validated
      │
@@ -205,14 +225,16 @@ That's it. The system will:
 
 ```
 idea-factory/
-├── skills/start-company/    # The trigger — under 140 lines
-│   └── SKILL.md
+├── skills/start-company/    # The trigger
+│   ├── SKILL.md             # v6.1 execution flow
+│   └── HARNESS-GUIDE.md     # Design decisions & evidence
 ├── templates/               # Pre-built, reusable
 │   ├── CLAUDE.md.tmpl       # Project constitution
 │   ├── settings.json        # Permissions + hooks
 │   ├── agents/              # PM, Developer, Designer
-│   ├── hooks/               # Quality gates, safety checks
-│   └── documents/           # PRD, essence template
+│   ├── hooks/               # check-quality, check-careful, check-safety
+│   ├── documents/           # PRD, essence, CONTRACT, handoff template
+│   └── scripts/             # codex-review-gate.sh (cross-model review)
 ├── install.sh               # One-command installer
 └── docs/ko/                 # Korean documentation
 ```
@@ -221,11 +243,14 @@ idea-factory/
 
 | Decision | Why |
 |----------|-----|
-| **140-line trigger** | 17K+ token prompts cause Claude to lose context and skip instructions |
 | **Templates, not generation** | Creating 30 files from scratch wastes the context window on boilerplate |
 | **ralph as backbone** | Post-condition chaining between skills is unreliable; a state-machine loop isn't |
-| **Parallel Agent reviews** | Same-session role-play isn't real analysis; separate Agent calls with isolated context are |
+| **4 isolated reviewers** | Same-session role-play isn't real analysis; worktree-isolated agents with fresh context are |
+| **Defects first, scores second** | Scoring alone triggers "Evaluator Leniency" (AI gives 9/10). Defect hunt first forces honesty |
+| **Playwright MCP for QA** | Code review alone misses UI bugs; real browser interaction catches what humans catch |
 | **essence.md as North Star** | Without it, features drift from the original vision within 2 sprints |
+| **CLAUDE.md under 80 lines** | AI compliance drops beyond ~150 instructions; system prompt uses ~50, leaving ~100 for the project |
+| **Fix-loop circuit breaker** | Without a cap, agents burn tokens in infinite retry loops on the same error |
 
 ---
 

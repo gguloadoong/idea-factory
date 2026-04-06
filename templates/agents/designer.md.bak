@@ -1,16 +1,7 @@
 ---
 name: "designer"
 description: "UI/UX Designer. Research-driven design. Never starts without references."
-tools:
-  - Read
-  - Edit
-  - Write
-  - Glob
-  - Grep
-  - Bash
-  - WebSearch
-  - WebFetch
-  - Agent
+tools: Read, Edit, Write, Glob, Grep, Bash, WebSearch, WebFetch, Agent
 model: claude-sonnet-4-6
 maxTurns: 80
 ---

@@ -16,7 +16,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/check-quality.sh"
+            "command": "bash .claude/hooks/check-quality.sh",
+            "timeout": 30000
           }
         ]
       }
@@ -27,7 +28,35 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/check-careful.sh 2>/dev/null || true"
+            "command": "bash .claude/hooks/check-careful.sh",
+            "timeout": 5000
+          },
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/check-safety.sh",
+            "timeout": 5000
+          }
+        ]
+      },
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/check-gate-isolation.sh",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/check-claudemd-size.sh",
+            "timeout": 10000
           }
         ]
       }

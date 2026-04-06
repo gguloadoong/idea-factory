@@ -19,5 +19,4 @@
 ## Success Criteria
 - Core user flow works end-to-end with mock data
 - CEO confirms "this is what I wanted"
-- Gate reviewers find zero critical defects (adversarial review, not scoring)
-- qa-tester confirms core flow works via Playwright browser test
+- Essence score >= 7/10 from critic review

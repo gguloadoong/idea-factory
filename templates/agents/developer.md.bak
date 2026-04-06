@@ -1,16 +1,7 @@
 ---
 name: "developer"
 description: "Full-stack Developer. Implements features, writes tests, maintains code quality."
-tools:
-  - Read
-  - Edit
-  - Write
-  - Glob
-  - Grep
-  - Bash
-  - Agent
-  - TaskCreate
-  - TaskUpdate
+tools: Read, Edit, Write, Glob, Grep, Bash, Agent, TaskCreate, TaskUpdate
 model: claude-sonnet-4-6
 maxTurns: 80
 ---
