@@ -17,9 +17,13 @@ You're the CEO — describe what you want in one line, and a team of AI agents b
 
 ---
 
-## What's New in v6.1
+## What's New in v7.1
 
-v6.1 is a major upgrade to the review pipeline and build safety, informed by [Anthropic's harness engineering research](https://www.anthropic.com/engineering/harness-design-long-running-apps) (March 2026).
+v7.1 (2026-04-11) is a hotfix over v7 that removes blocking PreToolUse hooks which were stalling downstream autonomous workflows (see [#2](https://github.com/gguloadoong/idea-factory/issues/2)). `templates/settings.json` now ships with `defaultMode: "bypassPermissions"` and an empty `PreToolUse` — the `deny` list still blocks destructive ops (`rm -rf /`, `sudo *`, `.env*`, credentials, secrets).
+
+v7 (2026-04-04) was the harness engineering overhaul: 11 battle-tested patterns from market-dashboard-v5 — Quality Ratchet, Protected Files, 5-Stage PR Pipeline, 6-Gate Deploy Consensus, CONTRACT FAQ, agent depth guidance, and more. See [HARNESS-GUIDE.md](skills/start-company/HARNESS-GUIDE.md#changelog) for the full changelog.
+
+v6.1 laid the foundation: 4-reviewer gate, isolated worktrees, two-pass evaluation, Playwright MCP, phase handoffs, Codex Gate. Informed by [Anthropic's harness engineering research](https://www.anthropic.com/engineering/harness-design-long-running-apps) (March 2026).
 
 | Feature | What it does |
 |---------|-------------|
@@ -29,7 +33,7 @@ v6.1 is a major upgrade to the review pipeline and build safety, informed by [An
 | **Playwright MCP** | qa-tester opens the live app in a real browser, clicks buttons, fills forms — not just code review |
 | **Phase Handoff Documents** | MVP, Harden, Ship phases produce handoff docs preserving context across transitions |
 | **Codex Gate** | Optional cross-model review via OpenAI Codex CLI for a second opinion on diffs |
-| **Safety Hooks** | `check-safety.sh` prevents secrets, large files, and debug artifacts from being committed |
+| **Safety via deny-list** | `permissions.deny` blocks destructive ops (`rm -rf /`, `sudo *`) and sensitive reads (`.env*`, credentials, secrets). No blocking PreToolUse hooks — autonomous workflows stay zero-friction. |
 | **CLAUDE.md 80-Line Limit** | Generated project CLAUDE.md stays under 80 lines (HumanLayer research: compliance drops beyond ~150 instructions) |
 | **Fix-Loop Circuit Breaker** | Same failure 3 times = stop and escalate to CEO (no more infinite token-burning loops) |
 | **HARNESS-GUIDE.md** | New design document explaining every architectural decision with evidence |
