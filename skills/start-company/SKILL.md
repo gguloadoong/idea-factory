@@ -68,18 +68,17 @@ Create project at `~/{folder-name}/`:
 12. `vercel.json` — from `templates/vercel.json` (preview 배포 비활성화, production만)
 13. `.coderabbit.yaml` — from `templates/.coderabbit.yaml`
 14. `src/CONTRACT.md` — from `templates/documents/CONTRACT.md.tmpl`, replace `{{FEATURE_NAME}}` with service name
-15. `.claude/hooks/check-safety.sh` — from `templates/hooks/check-safety.sh` (runtime guardrails)
-16. `.project/handoff/` — empty directory for phase transition documents (template: `templates/documents/handoff.md.tmpl`)
-17. `scripts/create-pr.sh` — from `templates/scripts/create-pr.sh` (5-stage PR pipeline)
-18. `scripts/pre-deploy-consensus.sh` — from `templates/scripts/pre-deploy-consensus.sh` (6-gate deploy consensus)
-19. `scripts/review-summary.sh` — from `templates/scripts/review-summary.sh` (review summary auto-post)
-20. `scripts/run-architect.sh` — from `templates/scripts/run-architect.sh` (protected file review)
-21. `scripts/update-project-docs.sh` — from `templates/scripts/update-project-docs.sh` (auto doc update on PR)
-22. `.protected-files` — empty, filled after Phase 1 (files requiring architect review)
-23. `.githooks/pre-push` — from `templates/.githooks/pre-push` (stale review warning)
-24. `.github/workflows/token-health.yml` — from `templates/.github/workflows/token-health.yml` (weekly token check)
-25. `.project/quality-baseline.md` — empty, generated after Phase 2 (from `templates/documents/quality-baseline.md.tmpl`)
-26. `git init` + `git config core.hooksPath .githooks` + initial commit
+15. `.project/handoff/` — empty directory for phase transition documents (template: `templates/documents/handoff.md.tmpl`)
+16. `scripts/create-pr.sh` — from `templates/scripts/create-pr.sh` (5-stage PR pipeline)
+17. `scripts/pre-deploy-consensus.sh` — from `templates/scripts/pre-deploy-consensus.sh` (6-gate deploy consensus)
+18. `scripts/review-summary.sh` — from `templates/scripts/review-summary.sh` (review summary auto-post)
+19. `scripts/run-architect.sh` — from `templates/scripts/run-architect.sh` (protected file review)
+20. `scripts/update-project-docs.sh` — from `templates/scripts/update-project-docs.sh` (auto doc update on PR)
+21. `.protected-files` — empty, filled after Phase 1 (files requiring architect review)
+22. `.githooks/pre-push` — from `templates/.githooks/pre-push` (stale review warning)
+23. `.github/workflows/token-health.yml` — from `templates/.github/workflows/token-health.yml` (weekly token check)
+24. `.project/quality-baseline.md` — empty, generated after Phase 2 (from `templates/documents/quality-baseline.md.tmpl`)
+25. `git init` + `git config core.hooksPath .githooks` + initial commit
 
 **Template variable reference**:
 - `{{SERVICE_NAME}}` — service name from analysis

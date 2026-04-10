@@ -157,30 +157,51 @@ The next phase reads this document FIRST, ensuring no knowledge loss. This is th
 
 ---
 
-## Design Decision: Runtime Safety Hooks
+## Design Decision: Runtime Safety via deny-list (v7.1 revision)
 
 ### The Problem
 
 CLAUDE.md rules are "suggestions" — the AI reads them but can still violate them.
 A rule saying "never force push" doesn't prevent force push; it only makes it less likely.
 
-[Claude Code Harness](https://github.com/Chachamaru127/claude-code-harness) enforces
-13 rules (R01-R13) via TypeScript that actually BLOCK dangerous operations.
+### What we tried in v7, and why it broke
 
-### The Solution
+v7 shipped a `check-safety.sh` PreToolUse Bash hook (and a sibling `check-careful.sh`)
+that intercepted **every** Bash command and blocked 8 dangerous categories (S01-S08:
+`sudo`, `.env` in git, `--force` push, `--hard` reset, `--no-verify`, direct push to
+main, certificate reads, `rm -rf` on root/home/project).
 
-`check-safety.sh` intercepts every Bash command BEFORE execution and blocks:
-- `sudo` (S01: privilege escalation)
-- `.env` in git commands (S02: secret exposure)
-- `--force` push (S03: history destruction)
-- `--hard` reset to main (S04: work destruction)
-- `--no-verify` (S05: hook bypass)
-- Direct push to main/master (S06: process bypass)
-- Certificate/credential file operations (S07: secret exposure)
-- `rm -rf` on root/home/project (S08: catastrophic deletion)
+It was the right instinct and the wrong mechanism. Because blocking PreToolUse hooks
+halt the loop mid-iteration, they forced user approval on routine benign commands in
+downstream projects. Autopilot and Ralph — the loop-based workflows this repo was
+built to enable — stopped working. See [#2](https://github.com/gguloadoong/idea-factory/issues/2)
+for the regression report. Lesson: **blocking PreToolUse hooks are architecturally
+incompatible with long-running autonomous loops**. Any safety mechanism added to this
+template must be exit-0 (observe and log, never halt).
 
-The hook follows the "Silent Success, Loud Failure" principle: safe commands pass
-silently (preserving AI context), dangerous commands trigger a user confirmation prompt.
+### The v7.1 solution: deny-list floor + bypass mode
+
+`templates/settings.json` ships two coupled mechanisms:
+
+1. **`permissions.defaultMode: "bypassPermissions"`** — routine commands flow through
+   without confirmation, preserving loop velocity.
+2. **`permissions.deny`** — a narrow floor that the harness refuses to cross, covering
+   the catastrophes no autonomous loop should ever need:
+   - `Bash(rm -rf /)`, `Bash(rm -rf ~)` — catastrophic deletion
+   - `Bash(sudo *)` — privilege escalation
+   - `Read(.env*)`, `Read(**/credentials*)`, `Read(**/*secret*)` — secret exfiltration
+
+The narrower deny-list is intentional: it captures the non-recoverable mistakes while
+leaving the long tail of "risky but sometimes legitimate" ops (force push, `--hard`
+reset, etc.) to CLAUDE.md rules and code review. Those latter cases are recoverable via
+git reflog / PR revert; the deny-list targets only the strictly unrecoverable.
+
+### The future: exit-0 advisory hooks (out of scope for v7.1)
+
+The right home for S01-S08-style pattern detection is a **logging-only** PreToolUse
+hook that always exits 0, writes observations to a log file, and never halts the loop.
+`check-careful.sh` is retained in `templates/hooks/` for this future rewrite. Tracked
+separately — not part of the v7.1 hotfix.
 
 ---
 
@@ -197,7 +218,7 @@ silently (preserving AI context), dangerous commands trigger a user confirmation
      │   └─ Creates project from templates/company/
      │       ├─ CLAUDE.md (project rules)
      │       ├─ agents/ (team definitions, 50+ lines each)
-     │       ├─ hooks/ (check-quality + check-careful + check-safety)
+     │       ├─ hooks/ (check-quality + check-claudemd-size — see v7.1 Design Decision)
      │       ├─ scripts/ (create-pr, pre-deploy-consensus, run-architect, etc.)
      │       ├─ .githooks/ (pre-push stale review warning)
      │       ├─ .project/ (essence, PRD, decisions, backlog, quality-baseline)
@@ -372,6 +393,12 @@ This skill is designed for non-technical CEOs/PMs. Key principles:
 
 ## Changelog
 
+- **v7.1 (2026-04-11)**: PreToolUse 훅 회귀 수정 (#2, #3)
+  - v7의 `check-careful.sh` + `check-safety.sh` (Bash) + `check-gate-isolation.sh` (Agent) PreToolUse 훅이 다운스트림 프로젝트에서 모든 Bash 명령마다 승인 프롬프트를 유발, 자율 워크플로우 마비
+  - `templates/settings.json`: `PreToolUse: []` 로 비움, `permissions.allow` 화이트리스트 제거 후 `defaultMode: "bypassPermissions"` 로 전환
+  - `permissions.deny` 는 유지 (`rm -rf /`, `sudo *`, `.env*`, credentials, secrets)
+  - `PostToolUse` (CLAUDE.md 크기 체크) 는 유지
+  - 교훈: 자율 실행 레포의 PreToolUse 훅은 **exit 0 로깅 전용**이어야 함. Blocking 훅은 근본적으로 autopilot/ralph 워크플로우와 양립 불가.
 - **v7 (2026-04-04)**: 11 battle-tested patterns from market-dashboard-v5 (13 phases, 200+ PRs)
   - Quality Ratchet: `.project/quality-baseline.md` — metrics only go up, never down
   - Protected Files: `.protected-files` + `run-architect.sh` — core logic changes require opus review
