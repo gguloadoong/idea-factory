@@ -370,7 +370,7 @@ v7 까지 idea-factory 는 암묵적으로 **"웹앱 + Playwright UI"** 를 가�
 
 **증거**: `docs/research/2026-04-12-ecc-comparison.md` Gap §5 (HIGH — Cost Tracking Hook)
 
-**구현** (2026-04-12, issue #9):
+**구현** (2026-04-11, issue #9):
 - `templates/hooks/stop-cost-summary.sh` — Stop 훅. stdin 으로 받는 hook payload 에서 `transcript_path` 추출, JSONL 파싱해서 input/output/cache_creation/cache_read 토큰 카테고리별 합산
 - `.claude/audit/cost-YYYY-MM-DD.jsonl` 에 한 줄 append: `{ts, session, input_tokens, output_tokens, cache_creation_input_tokens, cache_read_input_tokens}`
 - 첫 실행 시 `.claude/audit/.gitignore` 자동 생성
@@ -380,7 +380,7 @@ v7 까지 idea-factory 는 암묵적으로 **"웹앱 + Playwright UI"** 를 가�
 - `tests/hooks/stop-cost-summary.test.sh` — 14개 assertion (정상 합산, 빈 stdin, 누락 path, malformed JSONL, 빈 transcript, gitignore 자동 생성, JSONL 유효성, **shell injection 가드 카나리** 포함)
 
 **의존성**: 없음. 1.1 audit log 와 같은 디렉터리 공유.
-**상태**: `in-progress` (PR #10, 2026-04-12. 머지 시 `done` 로 업데이트)
+**상태**: `in-progress` (PR #10, 2026-04-11. 머지 시 `done` 로 업데이트)
 
 ### 7.3 Config protection hook [HIGH / Small]
 

@@ -30,6 +30,7 @@ cd "$TMPDIR" || exit 1
 TODAY=$(date +%Y-%m-%d)
 
 FAILED=0
+ASSERTIONS=0
 
 fail() {
   echo "  FAIL: $1"
@@ -37,6 +38,7 @@ fail() {
 }
 
 assert_eq() {
+  ASSERTIONS=$((ASSERTIONS + 1))
   [ "$1" = "$2" ] || fail "$3 — expected '$2', got '$1'"
 }
 
@@ -122,6 +124,23 @@ RC=$?
 assert_eq "$RC" "0" "T7: exit 0 with empty transcript file"
 assert_eq "$(last_field input_tokens)" "0" "T7: zero tokens with empty transcript"
 
+# ── Test 7b: non-numeric token values in transcript ──────────────
+# CodeRabbit review feedback: ensure one bad usage value doesn't abort
+# the whole file scan. Per-field safe_int should treat "abc" as 0 and
+# continue summing subsequent valid lines.
+cat > "$TMPDIR/non-numeric-transcript.jsonl" <<'EOF'
+{"type":"assistant","message":{"usage":{"input_tokens":"abc","output_tokens":10,"cache_creation_input_tokens":0,"cache_read_input_tokens":0}}}
+{"type":"assistant","message":{"usage":{"input_tokens":50,"output_tokens":25,"cache_creation_input_tokens":0,"cache_read_input_tokens":0}}}
+EOF
+PAYLOAD="{\"session_id\":\"nn\",\"transcript_path\":\"$TMPDIR/non-numeric-transcript.jsonl\"}"
+printf '%s' "$PAYLOAD" | bash "$HOOK"
+RC=$?
+assert_eq "$RC" "0" "T7b: exit 0 with non-numeric token values"
+# "abc" treated as 0 + 50 from valid line = 50
+assert_eq "$(last_field input_tokens)"  "50" "T7b: non-numeric 'abc' → 0, numeric 50 counted"
+# 10 from first line (output=10 was numeric) + 25 from second line = 35
+assert_eq "$(last_field output_tokens)" "35" "T7b: output=10+25=35 (both numeric, not skipped)"
+
 # ── Test 8: .gitignore auto-created ──────────────────────────────
 if [ ! -f .claude/audit/.gitignore ]; then
   fail "T8: .gitignore not auto-created in .claude/audit/"
@@ -146,21 +165,25 @@ except Exception as e:
 # Verifies that no shell metacharacter in transcript_path causes
 # command execution (regression test for code-injection class).
 # Hook should treat path literally; bogus path → not a file → zero tokens.
-PAYLOAD='{"session_id":"inj","transcript_path":"/tmp/$(touch /tmp/idea-factory-injection-canary).jsonl"}'
+#
+# Canary uses TMPDIR path (not fixed /tmp path) so stale canary from
+# prior runs or parallel processes cannot cause flakes (Copilot review).
+CANARY="$TMPDIR/injection-canary"
+rm -f "$CANARY"
+PAYLOAD="{\"session_id\":\"inj\",\"transcript_path\":\"$TMPDIR/\$(touch $CANARY).jsonl\"}"
 printf '%s' "$PAYLOAD" | bash "$HOOK"
 RC=$?
 assert_eq "$RC" "0" "T10: exit 0 with injection-pattern path"
-if [ -f /tmp/idea-factory-injection-canary ]; then
+if [ -f "$CANARY" ]; then
   fail "T10: SHELL INJECTION — canary file was created!"
-  rm -f /tmp/idea-factory-injection-canary
 fi
 
 # ── Summary ───────────────────────────────────────────────────────
 if [ "$FAILED" -gt 0 ]; then
   echo ""
-  echo "stop-cost-summary: $FAILED assertion(s) failed"
+  echo "stop-cost-summary: $((ASSERTIONS - FAILED))/$ASSERTIONS passed, $FAILED failed"
   exit 1
 fi
 
-echo "stop-cost-summary: 14 assertions passed"
+echo "stop-cost-summary: $ASSERTIONS assertions passed"
 exit 0
