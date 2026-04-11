@@ -64,17 +64,18 @@ v7.1 의 `defaultMode: bypassPermissions` + narrow deny-list 는 무마찰 자�
 
 **증거**: 
 - `docs/research/2026-04-11-tsb-harness-architect.md` §A.3 — "trading-signal-bot 은 `vercel --prod`, `vercel env rm`, `redis-cli FLUSHDB` 가 전부 허용됨. audit trail 없음."
-- `skills/start-company/HARNESS-GUIDE.md:196` — "Retained for future exit-0 advisory rewrite"
+- `skills/start-company/HARNESS-GUIDE.md` v7.1 Runtime Safety 섹션 — "Retained for future exit-0 advisory rewrite"
 
-**스케치**:
-- `templates/hooks/check-audit.sh` (가칭) — PreToolUse Bash 훅, **절대 exit non-zero 안 함**
-- 매 커맨드 + timestamp + session id 를 `.omc/audit/YYYY-MM-DD.jsonl` 에 append
-- 패턴 매칭으로 `CAREFUL` 태그 (예: `vercel --prod`, `npm install`, `redis-cli FLUSH*`) — 차단 아님, 로깅만
-- 별도 리뷰어 에이전트가 post-session 에 audit log 읽고 suspicious sequence 플래그
+**구현** (2026-04-11, issue #4):
+- `templates/hooks/check-audit.sh` — PreToolUse Bash 훅. `trap 'exit 0' ERR EXIT` + 모든 외부 호출에 fallback + 명시적 `exit 0`. **exit non-zero 경로 없음**.
+- `.claude/audit/YYYY-MM-DD.jsonl` 에 `{ts, session, matcher, tags, cmd}` JSONL append
+- CAREFUL 패턴 태그 (라벨만, 차단 아님): `deploy` (vercel --prod/env), `redis-flush` (FLUSHDB/FLUSHALL), `npm-install`, `git-destructive` (force push/hard reset), `rm-rf`
+- `templates/settings.json` 의 PreToolUse Bash matcher 에 등록 (timeout 3000ms)
+- `HARNESS-GUIDE.md` Runtime Safety 섹션에 v8.1.1 블록 추가, v7 blocking 훅과의 대비 명시 (재발 방지)
 
-**의존성**: 없음. 독립적으로 구현 가능.
+**의존성**: 없음. 독립적으로 완결. 1.4 (post-session 리뷰어) unblock.
 **첫 검증 사이트 후보**: trading-signal-bot (연동 계획은 `docs/field-reports/2026-04-11-tsb-contribution-plan.md` Phase E)
-**상태**: `todo`
+**상태**: `in-progress` (PR #5, 2026-04-11. 머지 시 `done` 로 업데이트 예정)
 
 ### 1.2 Write-time secret leakage scanner [MED / Small]
 

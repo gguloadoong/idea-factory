@@ -196,12 +196,37 @@ leaving the long tail of "risky but sometimes legitimate" ops (force push, `--ha
 reset, etc.) to CLAUDE.md rules and code review. Those latter cases are recoverable via
 git reflog / PR revert; the deny-list targets only the strictly unrecoverable.
 
-### The future: exit-0 advisory hooks (out of scope for v7.1)
+### v8.1.1: exit-0 audit log (landed, 2026-04-11)
 
-The right home for S01-S08-style pattern detection is a **logging-only** PreToolUse
-hook that always exits 0, writes observations to a log file, and never halts the loop.
-`check-careful.sh` is retained in `templates/hooks/` for this future rewrite. Tracked
-separately — not part of the v7.1 hotfix.
+The logging-only complement to the deny-list — first promised as "out of scope for
+v7.1", now shipped as v8 backlog item 1.1.
+
+`templates/hooks/check-audit.sh` runs on every Bash command via PreToolUse matcher.
+Its design invariant is **"must always exit 0"**: `trap 'exit 0' ERR EXIT`, every
+external call has a fallback, explicit `exit 0` at the bottom. Cannot cause the v7
+regression because it has no code path that returns non-zero.
+
+What it does:
+- Append `{ts, session, matcher, tags, cmd}` to `.claude/audit/YYYY-MM-DD.jsonl`
+- Tag suspicious patterns (label only, not block): `deploy` (vercel --prod, env add/rm),
+  `redis-flush` (FLUSHDB/FLUSHALL), `npm-install`, `git-destructive` (force push,
+  --hard reset), `rm-rf`
+- Stay silent on all failures — a failed audit log is preferable to a stalled loop
+
+What it is NOT:
+- Not a replacement for `permissions.deny`. Things that must never happen
+  (rm -rf /, sudo, secret reads) still live there.
+- Not a blocker. An agent running `vercel --prod` gets tagged `CAREFUL deploy`
+  but the command still runs. Enforcement is the deny-list's job.
+
+Downstream projects that care about post-session review (trading bots, payment
+services, deploy-sensitive repos) can add `.claude/audit/` to `.gitignore` and
+grep the JSONL files when a session misbehaves. A future item (v8 1.4) adds a
+post-session auditor agent to surface suspicious sequences automatically.
+
+Complementary pattern: `check-careful.sh` is retained in `templates/hooks/` for
+possible future use as a more specialized logging variant. It is currently
+unwired — the v8.1.1 `check-audit.sh` is the sole PreToolUse Bash hook.
 
 ---
 
