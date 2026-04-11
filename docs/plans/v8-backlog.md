@@ -388,15 +388,22 @@ v7 까지 idea-factory 는 암묵적으로 **"웹앱 + Playwright UI"** 를 가�
 
 **증거**: `docs/research/2026-04-12-ecc-comparison.md` Gap §5 (HIGH — Config Protection Hook). ECC 의 `pre:config-protection` 이 config 파일 쓰기 차단.
 
-**스케치**: 
+**구현** (2026-04-11, issue #11):
 - `templates/hooks/check-config-protection.sh` — PostToolUse Write|Edit 훅
-- 감지 대상 파일: `tsconfig.json`, `.eslintrc*`, `biome.json`, `jest.config.*`, `vitest.config.*`, `.github/workflows/ci*.yml`
-- 해당 파일의 변경에서 "strictness 낮추는 패턴" 감지: `"strict": false`, `// @ts-ignore` 추가, `skipLibCheck`, `rules: { ... : "off" }`
-- exit 0 보장 — 차단 아니라 audit log + 경고
-- 또는 deny-list 에 해당 파일 읽기/쓰기 추가 (더 강함)
+- **감지 대상 파일**: tsconfig*.json, .eslintrc*, eslint.config.*, biome.json(c), jest.config.*, vitest.config.*, package.json, .github/workflows/*.yml
+- **감지 패턴 10종**: strict_false, noImplicitAny_false, skipLibCheck_true, strictNullChecks_false, noImplicitReturns_false, allowJs_true, ts_ignore_comment, eslint_rule_off (`:"off"`), passWithNoTests, coverage_disabled
+- **단일 python3 호출** 로 payload 파싱, path filter, 파일 읽기, 패턴 매칭, JSONL 출력 전부 처리 (7.2 에서 확립한 패턴)
+- **Shell injection 가드**: file_path 를 python open() 에만 전달, shell 에 interpolate 안 함
+- **Early exit**: 설정 파일 아니면 즉시 exit 0, 패턴 감지 안 되면 로그 없이 exit 0 (noise 최소화)
+- `.claude/audit/config-guard-YYYY-MM-DD.jsonl` 에 `{ts, file, weakening_patterns, severity, note}` 기록
+- `templates/settings.json` 의 PostToolUse Write|Edit matcher 에 등록 (timeout 5000ms, check-claudemd-size.sh 와 공존)
+- `tests/hooks/check-config-protection.test.sh` — 14 테스트, **19+ assertions**:
+  - 정확성 (strict_false / eslint off / multiple patterns / ts_ignore in vitest.config.ts / 정상 strict:true 에 false positive 없음 / 비-config 파일 무시)
+  - 방어성 (empty stdin / malformed JSON / missing file_path / 존재 안 하는 파일 / shell injection 카나리)
+  - 학습층 (.gitignore 자동 생성 / JSONL 유효성)
 
 **의존성**: 없음.
-**상태**: `todo`
+**상태**: `in-progress` (PR #12, 2026-04-11. 머지 시 `done` 로 업데이트)
 
 ---
 
