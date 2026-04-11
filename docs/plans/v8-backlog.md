@@ -370,13 +370,17 @@ v7 까지 idea-factory 는 암묵적으로 **"웹앱 + Playwright UI"** 를 가�
 
 **증거**: `docs/research/2026-04-12-ecc-comparison.md` Gap §5 (HIGH — Cost Tracking Hook)
 
-**스케치**: 
-- `templates/hooks/stop-cost-summary.sh` — Stop 훅. 세션 transcript 또는 agent metrics 읽고 input/output 토큰 + 추정 비용 출력
-- `.claude/audit/cost-YYYY-MM-DD.jsonl` 에 기록 (audit log 와 동일 디렉터리)
-- exit 0 보장
+**구현** (2026-04-11, issue #9):
+- `templates/hooks/stop-cost-summary.sh` — Stop 훅. stdin 으로 받는 hook payload 에서 `transcript_path` 추출, JSONL 파싱해서 input/output/cache_creation/cache_read 토큰 카테고리별 합산
+- `.claude/audit/cost-YYYY-MM-DD.jsonl` 에 한 줄 append: `{ts, session, input_tokens, output_tokens, cache_creation_input_tokens, cache_read_input_tokens}`
+- 첫 실행 시 `.claude/audit/.gitignore` 자동 생성
+- 비용 환산은 의도적으로 안 함 (모델별/시점별 가격 변동 → raw 토큰만 영구 기록, 환산은 별도 도구)
+- shell injection 방지: transcript_path 를 env var 로 python3 에 전달 (절대 shell interpolation 안 함)
+- `templates/settings.json` 의 Stop hooks 배열에 등록 (timeout 5000ms, check-quality.sh 와 공존)
+- `tests/hooks/stop-cost-summary.test.sh` — 14개 assertion (정상 합산, 빈 stdin, 누락 path, malformed JSONL, 빈 transcript, gitignore 자동 생성, JSONL 유효성, **shell injection 가드 카나리** 포함)
 
 **의존성**: 없음. 1.1 audit log 와 같은 디렉터리 공유.
-**상태**: `todo`
+**상태**: `in-progress` (PR #10, 2026-04-11. 머지 시 `done` 로 업데이트)
 
 ### 7.3 Config protection hook [HIGH / Small]
 
