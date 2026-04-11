@@ -64,7 +64,7 @@ v7.1 의 `defaultMode: bypassPermissions` + narrow deny-list 는 무마찰 자�
 
 **증거**: 
 - `docs/research/2026-04-11-tsb-harness-architect.md` §A.3 — "trading-signal-bot 은 `vercel --prod`, `vercel env rm`, `redis-cli FLUSHDB` 가 전부 허용됨. audit trail 없음."
-- `skills/start-company/HARNESS-GUIDE.md` v7.1 Runtime Safety 섹션 — "Retained for future exit-0 advisory rewrite"
+- `skills/start-company/HARNESS-GUIDE.md` "Design Decision: Runtime Safety via deny-list (v7.1 revision)" 섹션 — v7.1 이 exit-0 advisory 훅을 future work 로 명시적으로 미룬 기록. v7 릴리스 커밋 `e61f0af` 와 v7.1 hotfix 커밋 `546f24c` 참조.
 
 **구현** (2026-04-11, issue #4):
 - `templates/hooks/check-audit.sh` — PreToolUse Bash 훅. `trap 'exit 0' ERR EXIT` + 모든 외부 호출에 fallback + 명시적 `exit 0`. **exit non-zero 경로 없음**.

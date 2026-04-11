@@ -216,8 +216,11 @@ What it does:
 What it is NOT:
 - Not a replacement for `permissions.deny`. Things that must never happen
   (rm -rf /, sudo, secret reads) still live there.
-- Not a blocker. An agent running `vercel --prod` gets tagged `CAREFUL deploy`
-  but the command still runs. Enforcement is the deny-list's job.
+- Not a blocker. An agent running `vercel --prod` gets the literal string
+  `deploy` appended to the JSONL entry's `tags` field — the command still runs.
+  Auditors grep the `tags` field (there is no literal `CAREFUL` prefix in
+  the log; "CAREFUL" is just a conceptual shorthand for "any tagged command").
+  Enforcement is the deny-list's job, not the audit log's.
 
 Downstream projects that care about post-session review (trading bots, payment
 services, deploy-sensitive repos) can add `.claude/audit/` to `.gitignore` and

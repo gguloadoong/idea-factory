@@ -49,6 +49,15 @@ trap 'exit 0' ERR EXIT
   # Create directory, silently tolerate failure
   mkdir -p "$AUDIT_DIR" 2>/dev/null || true
 
+  # Ensure audit logs are NEVER committed — drop a local .gitignore on first run.
+  # Defense-in-depth: even if the parent repo doesn't gitignore .claude/audit/,
+  # this local .gitignore makes everything in this directory untracked.
+  # Rationale: shell commands (and thus audit logs) can contain secrets in args.
+  GITIGNORE_FILE="$AUDIT_DIR/.gitignore"
+  if [ ! -f "$GITIGNORE_FILE" ] 2>/dev/null; then
+    printf '*\n!.gitignore\n' > "$GITIGNORE_FILE" 2>/dev/null || true
+  fi
+
   # Date helpers with fallbacks
   TODAY=$(date +%Y-%m-%d 2>/dev/null)
   [ -z "$TODAY" ] && TODAY="unknown-date"
@@ -68,12 +77,29 @@ trap 'exit 0' ERR EXIT
   fi
   [ -z "$PAYLOAD" ] && PAYLOAD='{}'
 
-  # Extract Bash command (best-effort grep; no jq dependency)
-  # Matches: "command": "something" or "command":"something"
-  CMD=$(printf '%s' "$PAYLOAD" \
-    | grep -o '"command"[[:space:]]*:[[:space:]]*"[^"]*"' 2>/dev/null \
-    | head -1 \
-    | sed 's/.*"command"[[:space:]]*:[[:space:]]*"\(.*\)".*/\1/' 2>/dev/null)
+  # Extract Bash command — prefer python3 (JSON-aware), grep as fallback.
+  # python3 handles escaped quotes correctly; grep is a safety net only.
+  CMD=""
+  if command -v python3 >/dev/null 2>&1; then
+    CMD=$(printf '%s' "$PAYLOAD" | python3 -c "
+import sys, json
+try:
+    d = json.loads(sys.stdin.read())
+    v = d.get('tool_input', {}).get('command', '')
+    if not isinstance(v, str):
+        v = str(v)
+    sys.stdout.write(v)
+except Exception:
+    pass
+" 2>/dev/null)
+  fi
+  # Fallback: grep-based extraction (may truncate on embedded escaped quotes)
+  if [ -z "$CMD" ]; then
+    CMD=$(printf '%s' "$PAYLOAD" \
+      | grep -o '"command"[[:space:]]*:[[:space:]]*"[^"]*"' 2>/dev/null \
+      | head -1 \
+      | sed 's/.*"command"[[:space:]]*:[[:space:]]*"\(.*\)".*/\1/' 2>/dev/null)
+  fi
   [ -z "$CMD" ] && CMD=""
 
   # Truncate extremely long commands
@@ -83,15 +109,19 @@ trap 'exit 0' ERR EXIT
     CMD="${CMD}...[truncated]"
   fi
 
-  # ── Pattern-based CAREFUL tagging (label only, NEVER block) ────
+  # ── Pattern tagging (label only, NEVER block). Case-insensitive. ──
+  # Tag values written to the `tags` field of the JSONL entry. Auditors
+  # grep these labels — there is no literal "CAREFUL" prefix in the output.
   TAGS=""
-  if printf '%s' "$CMD" | grep -qE "vercel[[:space:]]+(--prod|env[[:space:]]+(add|rm))" 2>/dev/null; then
+  if printf '%s' "$CMD" | grep -qiE "vercel[[:space:]]+(--prod|env[[:space:]]+(add|rm))" 2>/dev/null; then
     TAGS="$TAGS deploy"
   fi
-  if printf '%s' "$CMD" | grep -qE "redis-cli[[:space:]]+(FLUSHDB|FLUSHALL)" 2>/dev/null; then
+  if printf '%s' "$CMD" | grep -qiE "redis-cli[[:space:]]+(flushdb|flushall)" 2>/dev/null; then
     TAGS="$TAGS redis-flush"
   fi
-  if printf '%s' "$CMD" | grep -qE "npm[[:space:]]+install[[:space:]]+[^-]" 2>/dev/null; then
+  # npm install: matches "npm install", "npm install <pkg>", "npm install --flag",
+  # and bare "npm install" at end of command.
+  if printf '%s' "$CMD" | grep -qE "npm[[:space:]]+install([[:space:]]|$)" 2>/dev/null; then
     TAGS="$TAGS npm-install"
   fi
   if printf '%s' "$CMD" | grep -qE "git[[:space:]]+push.*--force|git[[:space:]]+reset.*--hard" 2>/dev/null; then
@@ -106,15 +136,21 @@ trap 'exit 0' ERR EXIT
   # ── Session metadata ───────────────────────────────────────────
   SESSION_ID="${CLAUDE_SESSION_ID:-unknown}"
 
-  # ── Minimal JSON escape for the command string ────────────────
-  # Escape: backslash → \\, double-quote → \", control chars → space
-  ESCAPED_CMD=$(printf '%s' "$CMD" \
-    | sed 's/\\/\\\\/g; s/"/\\"/g' 2>/dev/null \
-    | tr -d '\n\r\t' 2>/dev/null)
+  # ── Minimal JSON escape (applied to EVERY string field) ───────
+  # Escape backslash and double-quote; strip \n \r \t so they don't
+  # break the JSONL format. This MUST be applied to any field that
+  # can contain user/env-controlled data (CMD, SESSION_ID, TAGS).
+  escape_json() {
+    printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g' 2>/dev/null | tr -d '\n\r\t' 2>/dev/null
+  }
+  ESCAPED_CMD=$(escape_json "$CMD")
+  ESCAPED_SESSION=$(escape_json "$SESSION_ID")
+  ESCAPED_TAGS=$(escape_json "$TAGS")
 
   # ── Compose JSONL entry ────────────────────────────────────────
+  # NOW is from `date -u +...` — format is controlled, no escape needed.
   ENTRY=$(printf '{"ts":"%s","session":"%s","matcher":"Bash","tags":"%s","cmd":"%s"}' \
-    "$NOW" "$SESSION_ID" "$TAGS" "$ESCAPED_CMD" 2>/dev/null)
+    "$NOW" "$ESCAPED_SESSION" "$ESCAPED_TAGS" "$ESCAPED_CMD" 2>/dev/null)
 
   # ── Append to log, silently tolerate all failures ──────────────
   if [ -n "$ENTRY" ]; then
