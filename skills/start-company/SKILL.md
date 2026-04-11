@@ -177,7 +177,9 @@ Four reviewers run in parallel, each in isolated worktree:
   at a demo day?"
 
 - `code-reviewer` (opus, isolation: worktree): Code quality review.
-  Use the global `~/.claude/agents/code-reviewer.md` agent. It runs a 2-stage
+  Task-invoke the `code-reviewer` subagent. Its definition is vendored at
+  `.claude/agents/code-reviewer.md` (scaffolded from idea-factory's
+  `templates/agents/code-reviewer.md` at project creation). It runs a 2-stage
   review: Stage 1 = spec compliance (does it match PRD?), Stage 2 = code quality
   (security, SOLID, logic, performance). Issues are severity-rated (CRITICAL/HIGH/
   MEDIUM/LOW). Only CRITICAL and HIGH block the gate.

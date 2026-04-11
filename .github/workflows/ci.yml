@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  pull_request:
+    paths:
+      - 'templates/hooks/**'
+      - 'tests/**'
+      - '.github/workflows/ci.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'templates/hooks/**'
+      - 'tests/**'
+      - '.github/workflows/ci.yml'
+
+jobs:
+  hook-tests:
+    name: Hook tests + v7 regression guard
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify python3 (required by hooks for JSON parsing)
+        run: python3 --version
+
+      - name: Run test suite
+        run: bash tests/run-all.sh
+
+      - name: Report on failure
+        if: failure()
+        run: |
+          echo "::error::Hook tests or v7 regression guard failed."
+          echo "::error::See tests/README.md and docs/field-reports/2026-04-11-v7-propagation-postmortem.md"
+          echo "::error::All templates/hooks/*.sh MUST exit 0 on any input."

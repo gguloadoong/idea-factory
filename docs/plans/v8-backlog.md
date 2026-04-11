@@ -344,6 +344,98 @@ v7 까지 idea-factory 는 암묵적으로 **"웹앱 + Playwright UI"** 를 가�
 
 ---
 
+# Theme 7: ECC-inspired Infrastructure (2026-04-12 추가)
+
+`docs/research/2026-04-12-ecc-comparison.md` 에서 발견된 everything-claude-code 의 3개 infrastructure 패턴. idea-factory 의 워크플로 discipline 을 유지하면서 선별 흡수. ECC 의 181 skills 카탈로그 모델은 철학적으로 거부하되, 이 3개는 진짜 가치 있음.
+
+### 7.1 Session 상태 persistence (PreCompact + SessionStart) [HIGH / Medium]
+
+**문제**: idea-factory 의 MVP → Harden → Ship multi-phase workflow 는 long-running. context limit 치면 phase state 전부 날아감. 현재 핸드오프 docs 가 부분적 완화지만 compaction 경계에서 자동 save 없음.
+
+**증거**: 
+- `docs/research/2026-04-12-ecc-comparison.md` Gap §5 (HIGH — Session Persistence / PreCompact State Save)
+- Anthropic Engineering Blog (2026-03): context anxiety + structured handoff
+
+**스케치**: 
+- `templates/hooks/pre-compact-save.sh` — PreCompact 훅. phase state, 현재 story status, essence.md snapshot 을 `.claude/state/session-YYYY-MM-DD-HH-MM.md` 에 기록. exit 0 보장
+- `templates/hooks/session-start-restore.sh` — SessionStart 훅. 최근 session-*.md 파일 감지, 있으면 Claude 에게 읽기 권고하는 notice 출력
+- idea-factory phase 모델에 맞게 adapt (ECC 의 generic state store 아니라)
+
+**의존성**: 없음. 1.1 audit log 패턴과 유사한 훅 구조.
+**상태**: `todo`
+
+### 7.2 Cost tracking Stop hook [HIGH / Small]
+
+**문제**: CEO 가 idea-factory 돌리다 $40 토큰 태운 걸 경고 없이 발견하면 안 됨. idea-factory 는 현재 cost 가시성 전혀 없음. ECC 의 `stop:cost-tracker` 는 가벼운 Stop 훅.
+
+**증거**: `docs/research/2026-04-12-ecc-comparison.md` Gap §5 (HIGH — Cost Tracking Hook)
+
+**스케치**: 
+- `templates/hooks/stop-cost-summary.sh` — Stop 훅. 세션 transcript 또는 agent metrics 읽고 input/output 토큰 + 추정 비용 출력
+- `.claude/audit/cost-YYYY-MM-DD.jsonl` 에 기록 (audit log 와 동일 디렉터리)
+- exit 0 보장
+
+**의존성**: 없음. 1.1 audit log 와 같은 디렉터리 공유.
+**상태**: `todo`
+
+### 7.3 Config protection hook [HIGH / Small]
+
+**문제**: 에이전트가 TypeScript 에러 해결하려고 `tsconfig.json` 약화, ESLint 룰 비활성화, test coverage threshold 낮춤 — 장시간 빌드의 실제 failure mode. 에이전트는 "에러 없애기" 를 "코드 고치기" 로 해석 안 하고 "체크 낮추기" 로 해석.
+
+**증거**: `docs/research/2026-04-12-ecc-comparison.md` Gap §5 (HIGH — Config Protection Hook). ECC 의 `pre:config-protection` 이 config 파일 쓰기 차단.
+
+**스케치**: 
+- `templates/hooks/check-config-protection.sh` — PostToolUse Write|Edit 훅
+- 감지 대상 파일: `tsconfig.json`, `.eslintrc*`, `biome.json`, `jest.config.*`, `vitest.config.*`, `.github/workflows/ci*.yml`
+- 해당 파일의 변경에서 "strictness 낮추는 패턴" 감지: `"strict": false`, `// @ts-ignore` 추가, `skipLibCheck`, `rules: { ... : "off" }`
+- exit 0 보장 — 차단 아니라 audit log + 경고
+- 또는 deny-list 에 해당 파일 읽기/쓰기 추가 (더 강함)
+
+**의존성**: 없음.
+**상태**: `todo`
+
+---
+
+# Wave 0: 안전 기반 (2026-04-12 시작)
+
+v8 backlog 의 나머지 22개 항목을 안전하게 진행하기 위한 **pre-requisite**. 항목이 아니라 **인프라**.
+
+### W0.1 Latent bug fix — SKILL.md:180 path ✅ DONE (PR #8)
+
+**상태**: `done` (2026-04-12, PR #7)
+**내용**: `skills/start-company/SKILL.md` 의 stale `~/.claude/agents/code-reviewer.md` literal path 참조를 subagent-name 기반 + vendored path 로 교체.
+
+### W0.2 OMC 리뷰어 에이전트 vendoring ✅ DONE (PR #8)
+
+**상태**: `done` (2026-04-12, PR #7)
+**내용**: `templates/agents/` 에 다음 4개 vendor (OMC plugin cache 에서 verbatim copy):
+- `architect.md`, `critic.md`, `code-reviewer.md`, `qa-tester.md`
+
+효과: idea-factory 가 OMC 없는 사용자 머신에서도 완전 동작. OMC 는 여전히 optional recommended.
+
+### W0.3 테스트 인프라 ✅ DONE (PR #8)
+
+**상태**: `done` (2026-04-12, PR #7)
+**내용**: 
+- `tests/run-all.sh` — 테스트 러너
+- `tests/hooks/check-audit.test.sh` — v8 item 1.1 의 fixture 기반 회귀 테스트 (10개 assertion)
+- `tests/README.md` — 사용법 + "exit 0 불변식이 가장 중요" 설명
+
+### W0.4 CI exit-0 불변식 검증 ✅ DONE (PR #8)
+
+**상태**: `done` (2026-04-12, PR #7)
+**내용**: 
+- `tests/invariant-exit-zero.sh` — 모든 `templates/hooks/*.sh` 가 다양한 adversarial 입력 (정상, 빈, malformed JSON, binary, 1MB 거대, control chars) 에 exit 0 만 반환하는지 검증
+- `.github/workflows/ci.yml` — PR/push 에 자동 실행
+- **v7 회귀 재발 감지 하드 가드**
+
+### W0.5 학습층 research 아카이브 ✅ DONE (PR #8)
+
+**상태**: `done` (2026-04-12, PR #7)
+**내용**: 2026-04-12 ECC 분석 + OMC 필요성 분석 리포트를 `docs/research/` 에 영구 보관 (verbatim).
+
+---
+
 ## 📊 요약 통계
 
 | Theme | HIGH | MED | LOW | DONE | 총 |
@@ -354,7 +446,10 @@ v7 까지 idea-factory 는 암묵적으로 **"웹앱 + Playwright UI"** 를 가�
 | 4. Context & Memory | 0 | 2 | 1 | 0 | 3 |
 | 5. Domain Patterns | 2 | 2 | 1 | 0 | 5 |
 | 6. Reviewer Gate | 0 | 2 | 0 | 0 | 2 |
-| **합계** | **5** | **11** | **4** | **3** | **23** |
+| 7. ECC Infrastructure | 3 | 0 | 0 | 0 | 3 |
+| **합계** | **8** | **11** | **4** | **3** | **26** |
+
+Wave 0 (안전 기반, 별도 항목 아님): 5 sub-tasks, 전부 done (PR #7).
 
 ---
 
