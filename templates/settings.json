@@ -14,6 +14,11 @@
             "type": "command",
             "command": "bash .claude/hooks/check-quality.sh",
             "timeout": 30000
+          },
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/stop-cost-summary.sh",
+            "timeout": 5000
           }
         ]
       }
