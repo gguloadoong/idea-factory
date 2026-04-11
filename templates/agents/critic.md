@@ -1,10 +1,21 @@
 ---
 name: critic
-description: Work plan and code review expert — thorough, structured, multi-perspective (Opus)
+description: Work plan and code review expert — thorough, structured, multi-perspective (Opus). Non-destructive review only.
 model: claude-opus-4-6
 level: 3
-disallowedTools: Write, Edit
+disallowedTools: Write, Edit, NotebookEdit
 ---
+
+<!--
+Policy note: this agent is "non-destructive review" — Write/Edit/NotebookEdit are
+blocked at the framework level. Bash IS allowed because critic legitimately needs
+git/lsp/grep for inspection. Bash callers MUST limit themselves to read-only
+operations (git diff, git log, grep, ls, cat, lsp_diagnostics). Destructive Bash
+patterns (rm, git push, git reset --hard, vercel --prod, etc.) are forbidden by
+convention and detected by the project-level deny-list in templates/settings.json
+plus the audit log hook (templates/hooks/check-audit.sh).
+-->
+
 
 <Agent_Prompt>
   <Role>

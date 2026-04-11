@@ -14,7 +14,7 @@ idea-factory 의 훅, 스크립트, 템플릿이 회귀 없이 작동하는지 �
 
 ## 구조
 
-```
+```text
 tests/
 ├── README.md              # 이 파일
 ├── run-all.sh             # 모든 테스트 실행
@@ -22,6 +22,16 @@ tests/
 └── hooks/
     └── <hook-name>.test.sh
 ```
+
+## 외부 의존성
+
+- **`bash`** (필수) — 모든 테스트의 shell
+- **`python3`** (필수) — JSON 유효성 검증, JSONL 파싱, 일부 fixture 생성
+- **`find`, `head`, `printf`, `sed`, `tr`** (필수) — 표준 POSIX 도구
+- **`timeout`** (선택) — `invariant-exit-zero.sh` 가 사용 가능 시 hang 방어용으로 자동 사용. 없으면 timeout 없이 진행
+- **`tmux`** (선택, 미래) — qa-tester 에이전트의 인터랙티브 CLI 테스트용. 현재 자동 테스트 스위트는 사용 안 함
+
+CI (`.github/workflows/ci.yml`) 의 ubuntu-latest 러너는 위 도구 전부 기본 제공.
 
 각 훅마다 `tests/hooks/<hook-name>.test.sh` 를 작성한다. 이 파일은 self-contained 하고 exit 0 시 pass, non-zero 시 fail.
 

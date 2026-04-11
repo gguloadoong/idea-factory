@@ -47,6 +47,25 @@ INPUTS=(
 FAILED=0
 HOOK_COUNT=0
 
+# Per-hook 5-second timeout wrapper. If `timeout` is unavailable (e.g.
+# minimal environments), fall back to running without it. This protects
+# CI from hangs if a future hook has a code path that blocks (e.g.
+# `tsc --noEmit` that resolves slowly).
+run_hook() {
+  local hook="$1"
+  if command -v timeout >/dev/null 2>&1; then
+    timeout 5s bash "$hook" >/dev/null 2>&1
+  else
+    bash "$hook" >/dev/null 2>&1
+  fi
+}
+
+# Generate 1MB of "A" characters using shell tools (no python3 dependency).
+# `head -c` + `tr` is portable across GNU and BSD systems.
+gen_1mb() {
+  head -c 1000000 /dev/zero 2>/dev/null | tr '\0' 'A' 2>/dev/null
+}
+
 # Find all .sh files in templates/hooks/ (ignore .bak files)
 while IFS= read -r hook; do
   [ -f "$hook" ] || continue
@@ -56,7 +75,7 @@ while IFS= read -r hook; do
   # Test each predefined input
   for i in "${!INPUTS[@]}"; do
     input="${INPUTS[$i]}"
-    printf '%s' "$input" | bash "$hook" >/dev/null 2>&1
+    printf '%s' "$input" | run_hook "$hook"
     rc=$?
     if [ "$rc" -ne 0 ]; then
       preview=$(printf '%s' "$input" | head -c 60)
@@ -66,15 +85,15 @@ while IFS= read -r hook; do
   done
 
   # Edge case: binary garbage
-  head -c 200 /dev/urandom | bash "$hook" >/dev/null 2>&1
+  head -c 200 /dev/urandom | run_hook "$hook"
   rc=$?
   if [ "$rc" -ne 0 ]; then
     echo "  FAIL: $hook_name exited $rc with binary garbage"
     FAILED=$((FAILED + 1))
   fi
 
-  # Edge case: 1MB oversized input
-  python3 -c 'print("A" * 1000000)' 2>/dev/null | bash "$hook" >/dev/null 2>&1
+  # Edge case: 1MB oversized input (uses shell tools, no python3)
+  gen_1mb | run_hook "$hook"
   rc=$?
   if [ "$rc" -ne 0 ]; then
     echo "  FAIL: $hook_name exited $rc with 1MB oversized input"
@@ -82,7 +101,7 @@ while IFS= read -r hook; do
   fi
 
   # Edge case: control characters
-  printf '\x01\x02\x03\x04\x00binary\x07\xff' | bash "$hook" >/dev/null 2>&1
+  printf '\x01\x02\x03\x04\x00binary\x07\xff' | run_hook "$hook"
   rc=$?
   if [ "$rc" -ne 0 ]; then
     echo "  FAIL: $hook_name exited $rc with control chars"

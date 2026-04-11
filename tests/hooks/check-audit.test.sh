@@ -16,9 +16,20 @@ if [ ! -x "$HOOK" ]; then
   exit 1
 fi
 
-TMPDIR=$(mktemp -d)
+# mktemp portability: GNU `mktemp -d` works without template, BSD/macOS legacy
+# requires `-t <prefix>`. Try GNU form first, fall back to BSD form.
+TMPDIR=$(mktemp -d 2>/dev/null || mktemp -d -t idea-factory 2>/dev/null)
+if [ -z "$TMPDIR" ] || [ ! -d "$TMPDIR" ]; then
+  echo "  FAIL: could not create temp directory"
+  exit 1
+fi
 trap 'rm -rf "$TMPDIR"' EXIT
 cd "$TMPDIR" || exit 1
+
+# Capture date ONCE at test start to avoid race condition if midnight passes
+# between hook invocation (which writes to a date-stamped file) and assertion
+# helpers (which read from the same file).
+TODAY=$(date +%Y-%m-%d)
 
 FAILED=0
 
@@ -33,18 +44,16 @@ run_hook() {
   echo "$?"
 }
 
-# Last entry's "cmd" field (via python3)
+# Last entry's "cmd" field (via python3) — uses captured TODAY to avoid date race
 last_cmd() {
-  local f
-  f=".claude/audit/$(date +%Y-%m-%d).jsonl"
+  local f=".claude/audit/$TODAY.jsonl"
   [ -f "$f" ] || { echo ""; return; }
   tail -1 "$f" | python3 -c "import json,sys; print(json.loads(sys.stdin.read())['cmd'])" 2>/dev/null
 }
 
-# Last entry's "tags" field
+# Last entry's "tags" field — uses captured TODAY to avoid date race
 last_tags() {
-  local f
-  f=".claude/audit/$(date +%Y-%m-%d).jsonl"
+  local f=".claude/audit/$TODAY.jsonl"
   [ -f "$f" ] || { echo ""; return; }
   tail -1 "$f" | python3 -c "import json,sys; print(json.loads(sys.stdin.read())['tags'])" 2>/dev/null
 }
@@ -110,7 +119,7 @@ fi
 # ── Test 10: all JSONL entries are valid JSON ────────────────────
 python3 -c "
 import json
-f = '.claude/audit/$(date +%Y-%m-%d).jsonl'
+f = '.claude/audit/$TODAY.jsonl'
 try:
     with open(f) as fh:
         for line in fh:

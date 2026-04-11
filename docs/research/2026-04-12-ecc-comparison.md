@@ -20,7 +20,7 @@
 
 ## 2. Structure Overview
 
-```
+```text
 everything-claude-code/
 ├── agents/           # 47 specialized subagents (planner, reviewers, build resolvers per language, GAN agents)
 ├── skills/           # 181 skills (domain knowledge, workflows, patterns)

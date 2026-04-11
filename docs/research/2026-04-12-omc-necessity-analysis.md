@@ -13,14 +13,14 @@
 - **사용자의 전역 `CLAUDE.md` 는 80% 사용자 본인의 한국어 개발 룰 + 20% OMC boilerplate**. OMC 블록은 thin meta-instructions, active machinery 아님. OMC 블록 제거해도 인지 비용 거의 없음.
 - **권장: Option C (선택적 유지) — `ralph` + 글로벌 `architect`/`critic`/`code-reviewer`/`qa-tester` agent markdown 파일 유지**, 다른 OMC skill/hook 은 mental model 에서 제거, v8 에서 (a) ralph-equivalent loop 를 idea-factory 에 inline 또는 (b) 특정 agent .md 파일을 `templates/agents/` 에 vendor. 완전 strip 은 viable 하지만 현재는 premature.
 
-## 2. What OMC actually provides (concrete, from `/Users/bong/.claude/plugins/cache/omc/oh-my-claudecode/4.11.4/`)
+## 2. What OMC actually provides (concrete, from `~/.claude/plugins/cache/omc/oh-my-claudecode/4.11.4/`)
 
 검증된 내용:
 
 - **19 agent markdown files** at `agents/`: `analyst.md`, `architect.md`, `critic.md`, `code-reviewer.md`, `code-simplifier.md`, `debugger.md`, `designer.md`, `document-specialist.md`, `executor.md`, `explore.md`, `git-master.md`, `planner.md`, `qa-tester.md`, `scientist.md`, `security-reviewer.md`, `test-engineer.md`, `tracer.md`, `verifier.md`, `writer.md`.
 - **38 skills** at `skills/`: `autopilot`, `ralph`, `ralplan`, `team`, `ultrawork`, `ccg`, `trace`, `verify`, `debug`, `plan`, `deep-interview`, `deep-dive`, `external-context`, `ai-slop-cleaner`, `skillify`, `learner`, `wiki`, `omc-reference`, `omc-setup`, `omc-doctor`, + setup/release/mcp/notification/hud/visual-verdict/self-improve/sciomc/ultraqa/remember/cancel/ask/deepinit/project-session-manager/writer-memory.
 - **Bridge / dist / hooks / scripts / templates** — MCP tool surface (`mcp__plugin_oh-my-claudecode_t__*`): notepad, project-memory, state, session-search, ast_grep, lsp_*, python_repl, trace 등.
-- 64-line OMC 블록이 `/Users/bong/.claude/CLAUDE.md` 상단 (lines 1–64, `<!-- OMC:START -->` / `<!-- OMC:END -->` 로 wrap) 에 주입됨.
+- 64-line OMC 블록이 `~/.claude/CLAUDE.md` 상단 (lines 1–64, `<!-- OMC:START -->` / `<!-- OMC:END -->` 로 wrap) 에 주입됨.
 
 Concretely OMC 가 vanilla Claude Code 에 추가하는 것:
 1. Named agent taxonomy with prompt files.
@@ -46,7 +46,7 @@ Concretely OMC 가 vanilla Claude Code 에 추가하는 것:
 
 ## 4. Dependency graph — idea-factory 가 실제로 OMC 를 invoke 하나?
 
-`/Users/bong/idea-factory` 에서 `oh-my-claudecode|\.omc|OMC` grep 결과 **10 파일**, 이 중 real coupling 은:
+`~/idea-factory` 에서 `oh-my-claudecode|\.omc|OMC` grep 결과 **10 파일**, 이 중 real coupling 은:
 
 - **`skills/start-company/SKILL.md:148`** — `Then start /oh-my-claudecode:ralph`. **유일한 hard runtime dependency.** 전체 Phase 1–3 build loop 가 ralph 가정.
 - **`skills/start-company/SKILL.md:180`** — `Use the global ~/.claude/agents/code-reviewer.md agent`. Soft reference: 파일 존재 시 작동 (OMC 가 글로벌로 ship, vendored 복사본도 identically 작동).
@@ -98,7 +98,7 @@ severity 로 ranking:
 | **Trivial** | `CLAUDE.md` 의 64 lines OMC preamble 사라짐. 67-line 한국어 dev 블록은 영향 없음. |
 | **Trivial** | `<system-reminder>` hook injections 중지. (routinely override 중.) |
 
-**🚨 Critical finding**: `/Users/bong/.claude/agents/` 는 **비어있음** (확인됨). SKILL.md:180 의 "Use the global `~/.claude/agents/code-reviewer.md`" 명령은 그 literal path 에 존재하지 않는 파일을 참조 — 플러그인 cache `/Users/bong/.claude/plugins/cache/omc/oh-my-claudecode/4.11.4/agents/code-reviewer.md` 에만 존재. Claude Code 가 subagent 이름으로 Task-invoke 할 때 플러그인 메커니즘으로 resolve 할 수 있지만, SKILL.md 의 file-path reference 는 stale. 이건 **idea-factory 의 latent bug**, OMC 가 carry 하고 있다는 증거 아님.
+**🚨 Critical finding**: `~/.claude/agents/` 는 **비어있음** (확인됨). SKILL.md:180 의 "Use the global `~/.claude/agents/code-reviewer.md`" 명령은 그 literal path 에 존재하지 않는 파일을 참조 — 플러그인 cache `~/.claude/plugins/cache/omc/oh-my-claudecode/4.11.4/agents/code-reviewer.md` 에만 존재. Claude Code 가 subagent 이름으로 Task-invoke 할 때 플러그인 메커니즘으로 resolve 할 수 있지만, SKILL.md 의 file-path reference 는 stale. 이건 **idea-factory 의 latent bug**, OMC 가 carry 하고 있다는 증거 아님.
 
 ## 7. Alternatives comparison
 
@@ -145,16 +145,16 @@ severity 로 ranking:
 
 ## References
 
-- `/Users/bong/.claude/CLAUDE.md:1-64` — OMC preamble block (actively 사용 안 하는 64 lines).
-- `/Users/bong/.claude/CLAUDE.md:67-133` — 한국어 dev rules (실제로 작업을 govern 하는 부분).
-- `/Users/bong/idea-factory/skills/start-company/SKILL.md:148` — OMC 의 sole hard runtime dependency (`Then start /oh-my-claudecode:ralph`).
-- `/Users/bong/idea-factory/skills/start-company/SKILL.md:166-213` — OMC-provided agent definitions 에 의존하는 4 gate reviewers (architect/critic/code-reviewer/qa-tester).
-- `/Users/bong/idea-factory/skills/start-company/SKILL.md:180` — `~/.claude/agents/code-reviewer.md` 의 stale reference (path 존재하지 않음; 실제 파일은 plugin cache 에). **Latent bug.**
-- `/Users/bong/idea-factory/templates/agents/` — `pm.md`, `designer.md`, `developer.md` 만 포함. 4 개 reviewer agents 누락.
-- `/Users/bong/idea-factory/templates/scripts/create-pr.sh` — idea-factory 의 자체 5-stage PR pipeline, scaffolded projects 에서 OMC 의 `pr-create.sh` supersede.
-- `/Users/bong/.claude/scripts/pr-create.sh` — 글로벌 OMC-style fallback PR script, ~30 line stub.
-- `/Users/bong/.claude/plugins/cache/omc/oh-my-claudecode/4.11.4/agents/` — OMC 의 19 agent 파일 실제 위치.
-- `/Users/bong/.claude/plugins/cache/omc/oh-my-claudecode/4.11.4/skills/` — OMC 의 38 skills 실제 위치.
-- `/Users/bong/.claude/agents/` — 비어있음 확인; 이 literal path 로의 SKILL.md reference 는 broken.
-- `/Users/bong/idea-factory/README.md:198, 277` — OMC 를 optional dependency 로 나열, recommendation 과 consistent.
-- `/Users/bong/idea-factory/install.sh:60` — 스크립트가 이미 OMC 를 optional 로 취급, user-facing positioning 이미 정확.
+- `~/.claude/CLAUDE.md:1-64` — OMC preamble block (actively 사용 안 하는 64 lines).
+- `~/.claude/CLAUDE.md:67-133` — 한국어 dev rules (실제로 작업을 govern 하는 부분).
+- `~/idea-factory/skills/start-company/SKILL.md:148` — OMC 의 sole hard runtime dependency (`Then start /oh-my-claudecode:ralph`).
+- `~/idea-factory/skills/start-company/SKILL.md:166-213` — OMC-provided agent definitions 에 의존하는 4 gate reviewers (architect/critic/code-reviewer/qa-tester).
+- `~/idea-factory/skills/start-company/SKILL.md:180` — `~/.claude/agents/code-reviewer.md` 의 stale reference (path 존재하지 않음; 실제 파일은 plugin cache 에). **Latent bug.**
+- `~/idea-factory/templates/agents/` — `pm.md`, `designer.md`, `developer.md` 만 포함. 4 개 reviewer agents 누락.
+- `~/idea-factory/templates/scripts/create-pr.sh` — idea-factory 의 자체 5-stage PR pipeline, scaffolded projects 에서 OMC 의 `pr-create.sh` supersede.
+- `~/.claude/scripts/pr-create.sh` — 글로벌 OMC-style fallback PR script, ~30 line stub.
+- `~/.claude/plugins/cache/omc/oh-my-claudecode/4.11.4/agents/` — OMC 의 19 agent 파일 실제 위치.
+- `~/.claude/plugins/cache/omc/oh-my-claudecode/4.11.4/skills/` — OMC 의 38 skills 실제 위치.
+- `~/.claude/agents/` — 비어있음 확인; 이 literal path 로의 SKILL.md reference 는 broken.
+- `~/idea-factory/README.md:198, 277` — OMC 를 optional dependency 로 나열, recommendation 과 consistent.
+- `~/idea-factory/install.sh:60` — 스크립트가 이미 OMC 를 optional 로 취급, user-facing positioning 이미 정확.

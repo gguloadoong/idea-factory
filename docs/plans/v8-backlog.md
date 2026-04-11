@@ -400,12 +400,12 @@ v7 까지 idea-factory 는 암묵적으로 **"웹앱 + Playwright UI"** 를 가�
 
 v8 backlog 의 나머지 22개 항목을 안전하게 진행하기 위한 **pre-requisite**. 항목이 아니라 **인프라**.
 
-### W0.1 Latent bug fix — SKILL.md:180 path ✅ DONE (PR #7)
+### W0.1 Latent bug fix — SKILL.md:180 path ✅ DONE (PR #8)
 
 **상태**: `done` (2026-04-12, PR #7)
 **내용**: `skills/start-company/SKILL.md` 의 stale `~/.claude/agents/code-reviewer.md` literal path 참조를 subagent-name 기반 + vendored path 로 교체.
 
-### W0.2 OMC 리뷰어 에이전트 vendoring ✅ DONE (PR #7)
+### W0.2 OMC 리뷰어 에이전트 vendoring ✅ DONE (PR #8)
 
 **상태**: `done` (2026-04-12, PR #7)
 **내용**: `templates/agents/` 에 다음 4개 vendor (OMC plugin cache 에서 verbatim copy):
@@ -413,7 +413,7 @@ v8 backlog 의 나머지 22개 항목을 안전하게 진행하기 위한 **pre-
 
 효과: idea-factory 가 OMC 없는 사용자 머신에서도 완전 동작. OMC 는 여전히 optional recommended.
 
-### W0.3 테스트 인프라 ✅ DONE (PR #7)
+### W0.3 테스트 인프라 ✅ DONE (PR #8)
 
 **상태**: `done` (2026-04-12, PR #7)
 **내용**: 
@@ -421,7 +421,7 @@ v8 backlog 의 나머지 22개 항목을 안전하게 진행하기 위한 **pre-
 - `tests/hooks/check-audit.test.sh` — v8 item 1.1 의 fixture 기반 회귀 테스트 (10개 assertion)
 - `tests/README.md` — 사용법 + "exit 0 불변식이 가장 중요" 설명
 
-### W0.4 CI exit-0 불변식 검증 ✅ DONE (PR #7)
+### W0.4 CI exit-0 불변식 검증 ✅ DONE (PR #8)
 
 **상태**: `done` (2026-04-12, PR #7)
 **내용**: 
@@ -429,7 +429,7 @@ v8 backlog 의 나머지 22개 항목을 안전하게 진행하기 위한 **pre-
 - `.github/workflows/ci.yml` — PR/push 에 자동 실행
 - **v7 회귀 재발 감지 하드 가드**
 
-### W0.5 학습층 research 아카이브 ✅ DONE (PR #7)
+### W0.5 학습층 research 아카이브 ✅ DONE (PR #8)
 
 **상태**: `done` (2026-04-12, PR #7)
 **내용**: 2026-04-12 ECC 분석 + OMC 필요성 분석 리포트를 `docs/research/` 에 영구 보관 (verbatim).
