@@ -43,6 +43,11 @@
             "type": "command",
             "command": "bash .claude/hooks/check-claudemd-size.sh",
             "timeout": 10000
+          },
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/check-config-protection.sh",
+            "timeout": 5000
           }
         ]
       }
