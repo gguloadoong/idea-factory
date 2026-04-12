@@ -120,16 +120,27 @@ if [ ! -f .claude/audit/.gitignore ]; then
   fail "T11: .gitignore not auto-created"
 fi
 
-# ── Test 12: counter file contains valid number ──────────────────
-COUNTER_FILE=".claude/audit/.decay-counter-test-silent"
+# ── Test 12: backlog goal reminder included when .project/backlog.md exists ─
+rm -rf .claude 2>/dev/null
+export CLAUDE_SESSION_ID="test-backlog-goal"
+export DECAY_REINJECT_INTERVAL=1
+mkdir -p .project 2>/dev/null
+printf '%s\n%s\n' "- Deploy trading bot MVP" "- Setup monitoring" > .project/backlog.md
+GOAL_OUT=$(echo '{}' | bash "$HOOK" 2>/dev/null)
+if ! printf '%s' "$GOAL_OUT" | grep -q "Deploy trading bot MVP" 2>/dev/null; then
+  fail "T12: backlog goal reminder missing from reinjection"
+fi
+
+# ── Test 13: counter file contains valid number ──────────────────
+COUNTER_FILE=".claude/audit/.decay-counter-test-backlog-goal"
 if [ -f "$COUNTER_FILE" ]; then
   VAL=$(cat "$COUNTER_FILE")
   case "$VAL" in
-    ''|*[!0-9]*) fail "T12: counter file contains non-numeric: '$VAL'" ;;
+    ''|*[!0-9]*) fail "T13: counter file contains non-numeric: '$VAL'" ;;
     *) ;; # ok
   esac
 else
-  fail "T12: counter file not created"
+  fail "T13: counter file not created"
 fi
 
 # ── Summary ───────────────────────────────────────────────────────
@@ -139,5 +150,5 @@ if [ "$FAILED" -gt 0 ]; then
   exit 1
 fi
 
-echo "check-decay-counter: 12 assertions passed"
+echo "check-decay-counter: 13 assertions passed"
 exit 0

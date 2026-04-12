@@ -53,8 +53,9 @@ export CLAUDE_AUDIT_DIR=".claude/audit"
 mkdir -p "$CLAUDE_AUDIT_DIR"
 
 # Create only 5 audit entries (below threshold of 20)
+TODAY=$(date +%Y-%m-%d)
 for i in $(seq 1 5); do
-  echo '{"ts":"test","cmd":"ls"}' >> "$CLAUDE_AUDIT_DIR/$(date +%Y-%m-%d).jsonl"
+  echo '{"ts":"test","cmd":"ls"}' >> "$CLAUDE_AUDIT_DIR/$TODAY.jsonl"
 done
 
 OUT=$(echo '{}' | bash "$HOOK" 2>/dev/null)

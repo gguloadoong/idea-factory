@@ -55,14 +55,14 @@ trap 'exit 0' ERR EXIT
 
   # Check 2: decisions.md was modified in this session
   if [ "$SHOULD_PROMPT" = false ] && [ -f ".project/decisions.md" ] 2>/dev/null; then
-    if git diff --name-only HEAD~1 HEAD 2>/dev/null | grep -q "decisions.md" 2>/dev/null; then
+    if git diff --name-only HEAD~1 HEAD 2>/dev/null | grep -qxF "decisions.md" 2>/dev/null; then
       SHOULD_PROMPT=true
     fi
   fi
 
   # Check 3: recent commits have fix: or feat: (new work done)
   if [ "$SHOULD_PROMPT" = false ]; then
-    RECENT=$(git log --oneline -5 --since="8 hours ago" 2>/dev/null || echo "")
+    RECENT=$(git log --oneline -5 --since="8 hours ago" --no-merges 2>/dev/null || echo "")
     if printf '%s' "$RECENT" | grep -qE "^[a-f0-9]+ (fix|feat):" 2>/dev/null; then
       SHOULD_PROMPT=true
     fi

@@ -92,7 +92,7 @@ except Exception:
   # ── Count occurrences of current file in window ────────────────
   HIT_COUNT=0
   if [ -f "$LEDGER_FILE" ] 2>/dev/null; then
-    HIT_COUNT=$(grep -cF "$FILE_PATH" "$LEDGER_FILE" 2>/dev/null || echo 0)
+    HIT_COUNT=$(grep -cxF "$FILE_PATH" "$LEDGER_FILE" 2>/dev/null || echo 0)
     case "$HIT_COUNT" in
       ''|*[!0-9]*) HIT_COUNT=0 ;;
     esac
@@ -119,8 +119,13 @@ EOF
     NOW=$(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || echo "unknown")
     TODAY=$(date +%Y-%m-%d 2>/dev/null || echo "unknown-date")
     LOG_FILE="$STATE_DIR/loop-breaker-$TODAY.jsonl"
+    # JSON-escape file path to prevent broken JSONL
+    ESCAPED_PATH="$FILE_PATH"
+    if command -v python3 >/dev/null 2>&1; then
+      ESCAPED_PATH=$(python3 -c "import json,sys;print(json.dumps(sys.argv[1])[1:-1])" "$FILE_PATH" 2>/dev/null) || ESCAPED_PATH="$FILE_PATH"
+    fi
     printf '{"ts":"%s","file":"%s","hits":%d,"level":"escalate"}\n' \
-      "$NOW" "$FILE_PATH" "$HIT_COUNT" >> "$LOG_FILE" 2>/dev/null || true
+      "$NOW" "$ESCAPED_PATH" "$HIT_COUNT" >> "$LOG_FILE" 2>/dev/null || true
 
   elif [ "$HIT_COUNT" -ge "$WARN_THRESHOLD" ] 2>/dev/null; then
     BASENAME=$(basename "$FILE_PATH" 2>/dev/null || echo "$FILE_PATH")
