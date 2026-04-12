@@ -140,7 +140,7 @@ v7.1 까지 idea-factory 는 자체 리서치/결정/학습을 체계적으로 �
 **증거**: 이번 세션 자체. 만약 사용자가 "기록 안 하나?" 하고 물어보지 않았다면 두 개의 심층 리서치 리포트가 그냥 증발했을 것.
 
 **의존성**: 없음.
-**상태**: `todo`
+**상태**: `done` (2026-04-12, `templates/hooks/stop-learning-capture.sh` — Stop 훅. 학습층 디렉터리 존재 + 20+ audit 엔트리 시 4가지 학습 카테고리 기록 제안. 8 assertions 통과)
 
 ### 2.5 Research artifact template [LOW / Small]
 
