@@ -410,6 +410,22 @@ v7 까지 idea-factory 는 암묵적으로 **"웹앱 + Playwright UI"** 를 가�
 **의존성**: 없음.
 **상태**: `todo`
 
+### 7.4 Template-to-downstream sync mechanism [HIGH / Large]
+
+**문제**: idea-factory 의 가장 큰 구조적 결함. 템플릿을 개선해도 이미 스캐폴드된 프로젝트에는 전파되지 않음. `vercel.json` ignoreCommand 누락으로 8개 레포에서 불필요한 Vercel 과금이 발생한 것이 실증 사례. `settings.json`, `hooks/`, `CLAUDE.md` 전부 같은 문제를 갖고 있음.
+
+**증거**: 2026-04-13 Vercel 과금 사건 — trading-signal-bot(ignoreCommand 누락), costock(문법 오류), signalplay/chimp-pick/aptner(exit 1 누락). 전부 스캐폴드 시점의 불완전한 템플릿이 원인. `docs/field-reports/2026-04-13-vercel-billing-incident.md` 참조.
+
+**스케치**:
+- `scripts/sync-downstream.sh` — idea-factory 템플릿과 다운스트림 프로젝트의 drift 감지
+- 동기화 대상 파일 목록: `vercel.json`, `.claude/settings.json`, `.claude/hooks/*`, `.coderabbit.yaml`, `.github/workflows/*`
+- 동작 모드: (1) `--check` drift 리포트만, (2) `--apply` PR 자동 생성
+- 각 다운스트림 프로젝트에 `.idea-factory-version` 파일로 스캐폴드 시점 추적
+- cron 또는 수동 실행
+
+**의존성**: 없음. 독립 착수 가능.
+**상태**: `todo`
+
 ---
 
 # Wave 0: 안전 기반 (2026-04-12 시작)
