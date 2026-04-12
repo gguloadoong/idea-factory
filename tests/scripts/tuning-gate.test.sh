@@ -61,10 +61,10 @@ assert_output_not_contains() {
 setup_repo() {
   local tmpdir
   tmpdir=$(mktemp -d)
-  git -C "$tmpdir" init -q
+  git -C "$tmpdir" init -q -b main
   git -C "$tmpdir" config user.email "test@test.com"
   git -C "$tmpdir" config user.name "Test"
-  # Create initial commit so merge-base resolution works
+  # Create initial commit on main so merge-base resolution works
   echo "init" > "$tmpdir/README.md"
   git -C "$tmpdir" add README.md
   git -C "$tmpdir" commit -q -m "init"
