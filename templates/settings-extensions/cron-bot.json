@@ -1,0 +1,19 @@
+{
+  "_meta": {
+    "type": "cron-bot",
+    "description": "크론 봇 / 데이터 파이프라인용 추가 deny-list",
+    "evidence": "docs/plans/v8-backlog.md item 5.2"
+  },
+  "deny": [
+    "Bash(vercel --prod*)",
+    "Bash(vercel deploy --prod*)",
+    "Bash(crontab -r*)",
+    "Bash(crontab -e*)",
+    "Bash(systemctl start*)",
+    "Bash(systemctl restart*)",
+    "Bash(pm2 start*)",
+    "Bash(pm2 restart*)",
+    "Bash(redis-cli FLUSHDB*)",
+    "Bash(redis-cli FLUSHALL*)"
+  ]
+}
