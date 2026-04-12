@@ -74,7 +74,8 @@ Create project at `~/{folder-name}/`:
 9. `.github/workflows/ci.yml` — from `templates/.github/workflows/ci.yml`
 10. `.github/workflows/label-pr.yml` — from `templates/.github/workflows/label-pr.yml`
 11. `.github/labeler.yml` — from `templates/.github/labeler.yml`
-12. `vercel.json` — from `templates/vercel.json` (preview 배포 비활성화, production만)
+12. `vercel.json` — from `templates/vercel.json` (preview 배포 비활성화, production만).
+    **Vercel 연결 후 필수 설정**: Dashboard > Settings > Git > "Production Branch" = `main`, Preview Deployments = OFF
 13. `.coderabbit.yaml` — from `templates/.coderabbit.yaml`
 14. `src/CONTRACT.md` — from `templates/documents/CONTRACT.md.tmpl`, replace `{{FEATURE_NAME}}` with service name
 15. `.project/handoff/` — empty directory for phase transition documents (template: `templates/documents/handoff.md.tmpl`)
