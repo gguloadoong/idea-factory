@@ -424,7 +424,7 @@ v7 까지 idea-factory 는 암묵적으로 **"웹앱 + Playwright UI"** 를 가�
 - cron 또는 수동 실행
 
 **의존성**: 없음. 독립 착수 가능.
-**상태**: `todo`
+**상태**: `done` — `scripts/sync-downstream.sh` + `scripts/sync-lib.py` (gh API 기반, 클론 불필요) + `downstream-registry.json` (10개 레포) + `sync-manifest.json` (20 managed + 1 computed + 5 customized) + 10 assertions 테스트. 첫 실행 결과: 48 drifted, 145 missing across 10 repos.
 
 ---
 
