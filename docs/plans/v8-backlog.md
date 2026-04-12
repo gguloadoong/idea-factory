@@ -270,7 +270,7 @@ v7 까지 idea-factory 는 암묵적으로 **"웹앱 + Playwright UI"** 를 가�
 - Numerical ADR 포맷 (decisions.md 변종)
 
 **트레이딩 봇 외 적용 가능**: ML 하이퍼파라미터 튜닝, 추천 시스템 가중치, 가격 engine 파라미터.
-**상태**: `todo`
+**상태**: `done` — `templates/workflows/tuning-session.md` 프로토콜 + `scripts/tuning-gate.sh` advisory 게이트 + `templates/experiments/README.md` + 17 assertions 테스트
 
 ### 5.2 Cron-bot project template [HIGH / Large]
 
@@ -288,7 +288,7 @@ v7 까지 idea-factory 는 암묵적으로 **"웹앱 + Playwright UI"** 를 가�
 
 **`start-company` 분기**: "이 프로젝트는 웹앱 인가요 봇 인가요?" 질문을 킥오프에 추가.
 **의존성**: 5.1 (tuning harness) 와 자연스럽게 통합됨.
-**상태**: `todo`
+**상태**: `done` — `templates/cron-bot/` (CLAUDE.md.tmpl + scripts/backtest.sh + scripts/rollback.sh + scripts/health-check.sh + README.md)
 
 ### 5.3 Runtime metrics quality ratchet variant [MED / Medium]
 
