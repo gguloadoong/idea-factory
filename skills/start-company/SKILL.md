@@ -27,7 +27,7 @@ Build a virtual startup and deliver a working MVP.
 Launch two agents in parallel:
 
 **Agent 1** (analyst, opus): Analyze the idea.
-- Service name, folder name, service type (SaaS/O2O/commerce/content/data/internal-tool)
+- Service name, folder name, service type (SaaS/O2O/commerce/content/data/internal-tool), project type (web-app/cron-bot/trading/payment)
 - Core problem, target users, competitors, differentiation
 - Risk factors (tech, legal, business)
 - Output: structured analysis
@@ -45,7 +45,10 @@ After completing STEP 1, proceed immediately to STEP 2.
 Read templates from `~/.claude/templates/company/`.
 Create project at `~/{folder-name}/`:
 
-1. `CLAUDE.md` — from `templates/CLAUDE.md.tmpl`, replace `{{variables}}`.
+1. `CLAUDE.md` — choose template based on project type:
+   - **cron-bot/trading**: from `templates/cron-bot/CLAUDE.md.tmpl` (no UI/Playwright, yes reliability/monitoring rules)
+   - **web-app/payment**: from `templates/CLAUDE.md.tmpl`
+   Replace `{{variables}}`.
    **CRITICAL**: CLAUDE.md MUST be a full file (30-80 lines) with project rules, quality gates,
    and AI regression prevention. NEVER replace it with a single `@AGENTS.md` pointer.
    If variable substitution fails, copy the template as-is and fill manually in STEP 3.
@@ -84,7 +87,13 @@ Create project at `~/{folder-name}/`:
 22. `.githooks/pre-push` — from `templates/.githooks/pre-push` (stale review warning)
 23. `.github/workflows/token-health.yml` — from `templates/.github/workflows/token-health.yml` (weekly token check)
 24. `.project/quality-baseline.md` — empty, generated after Phase 2 (from `templates/documents/quality-baseline.md.tmpl`)
-25. `git init` + `git config core.hooksPath .githooks` + initial commit
+25. **cron-bot/trading only** — additional files from `templates/cron-bot/scripts/`:
+    - `scripts/backtest.sh` — backtest runner (date range + config)
+    - `scripts/rollback.sh` — version rollback with audit logging
+    - `scripts/health-check.sh` — JSON health status reporter
+    - `templates/workflows/tuning-session.md` → `.project/tuning-protocol.md` (parameter tuning protocol)
+    - `.omc/experiments/` directory with README from `templates/experiments/README.md`
+26. `git init` + `git config core.hooksPath .githooks` + initial commit
 
 **Template variable reference**:
 - `{{SERVICE_NAME}}` — service name from analysis

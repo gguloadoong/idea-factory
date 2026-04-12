@@ -1,0 +1,78 @@
+# {{SERVICE_NAME}}
+
+## Overview
+- **Service**: {{SERVICE_NAME}}
+- **Type**: cron-bot / data-pipeline
+- **Mission**: {{MISSION}}
+- **Model**: sonnet (default) / opus (architecture, RCA, deep analysis)
+
+## Tech Stack
+{{TECH_STACK}}
+
+## Team
+| Role | Agent | Model |
+|------|-------|-------|
+{{TEAM_TABLE}}
+
+## Quality Gates
+1. Build passes (`npm run build` or equivalent)
+2. No lint errors
+3. All existing tests pass
+4. New features have tests
+5. Bug fixes have reproduction test
+6. Backtest passes on last 30 days of data before deploy
+
+## Session Start (MUST read before doing anything)
+Every new session, read these files IN ORDER before writing any code:
+1. `.project/essence.md` — Why this bot exists (direction compass)
+2. `.project/PRD.md` — What to build (current features and scope)
+3. `.project/backlog.md` — What's next (priority order)
+4. `.project/decisions.md` — What was already decided (don't re-decide)
+5. `.project/handoff/` — Latest handoff doc (what works, what doesn't, where we left off)
+6. `.project/checkpoint.md` — Last session summary (if exists)
+7. `.omc/audit/rollbacks.jsonl` — Recent rollbacks (understand recent instability)
+
+If any of these don't exist yet, skip and move on.
+
+## Bot Reliability Rules
+- **Idempotent operations**: Every run must produce the same result if inputs are the same. Use upsert, not insert. Track processed IDs.
+- **Graceful shutdown**: Handle `SIGTERM`/`SIGINT`. Finish in-flight work, flush buffers, close DB connections before exit.
+- **Retry with backoff**: Transient failures (network, rate limits) → exponential backoff, max 3 retries. Permanent failures (bad data, auth) → fail fast, alert immediately.
+- **Dead-letter queue**: Unprocessable records go to a dead-letter store (file or DB table), never silently dropped.
+- **Run lock**: Prevent concurrent runs. Use a PID file or DB lock. If a lock exists and the process is dead, clean it up.
+
+## Data Integrity Rules
+- **Validate inputs**: Schema-check every incoming record before processing. Reject and log malformed data.
+- **Never delete production data**: Soft-delete only (set `deleted_at`). Hard deletes require a separate manual script and explicit approval.
+- **Audit all state changes**: Every write to production state must append a record to `.omc/audit/` (what changed, when, by which run).
+- **Dry-run mode**: All destructive operations must support `--dry-run` flag that logs what would happen without doing it.
+- **Backtest before deploy**: Run `scripts/backtest.sh` on recent data. Results saved to `.omc/experiments/`. Regression > 5% blocks deploy.
+
+## Monitoring Rules
+- **Health check endpoint**: Expose `scripts/health-check.sh`. CI and uptime monitors call this. Must return JSON with `status` field.
+- **Alert on failure**: Any unhandled exception or non-zero exit must trigger an alert (PagerDuty, Slack, or equivalent). Never fail silently.
+- **Log rotation**: Logs written to `logs/`. Rotate daily, keep 30 days. Never write unbounded logs.
+- **Run metrics**: Each run logs to `.omc/audit/runs.jsonl`: `{ts, duration_ms, records_processed, errors, status}`.
+- **Last-success file**: Write `.last_success` timestamp after every clean run. Health check reads this to detect stale runs.
+
+## Context Health Management
+- After every story completion, check context usage
+- 60% → `/compact Keep: essence, decisions, current story, bugs`
+- 80% → checkpoint.md 저장 + CEO에게 경고
+- 95% → STOP + 새 세션 필요
+
+## AI Regression Prevention
+1. **Delete zombie files immediately** — When a module is deleted, delete the file.
+2. **CONTRACT pattern** — Each feature directory has a `*_CONTRACT.md`: active list + permanently-deleted list.
+3. **Done = manually verified** — "Done" means verified with real data from a recent backtest, not just checklist ticked.
+4. **Independent review before PR** — Pass diff to `code-reviewer` agent. Self-review in the same context is invalid.
+
+## Rules
+- Finish one thing 100% before starting the next
+- Questions to CEO: plain language, multiple choice only
+- Fix problems immediately. Report only what you can't fix.
+- Every feature must serve `.project/essence.md`
+- Same approach fails twice → root cause analysis
+- Same approach fails 3 times → STOP. 다른 전략으로 전환하거나 CEO에게 escalate
+- Reuse > library > build from scratch
+- **사용자가 명시적으로 중단을 요청하기 전까지 자의적으로 작업을 중단하지 않는다**
