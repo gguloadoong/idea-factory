@@ -1,0 +1,21 @@
+{
+  "_meta": {
+    "type": "trading",
+    "description": "라이브 머니 봇 / 트레이딩 시스템용 추가 deny-list",
+    "evidence": "docs/research/2026-04-11-tsb-harness-architect.md §A.3"
+  },
+  "deny": [
+    "Bash(vercel --prod*)",
+    "Bash(vercel deploy --prod*)",
+    "Bash(npm run deploy*)",
+    "Bash(redis-cli FLUSHDB*)",
+    "Bash(redis-cli FLUSHALL*)",
+    "Bash(redis-cli DEL *)",
+    "Bash(node*--live*)",
+    "Bash(node*--production*)",
+    "Bash(*LIVE_MODE=true*)",
+    "Bash(*REAL_MONEY=true*)",
+    "Bash(curl*api.binance.com/api/v3/order*)",
+    "Bash(curl*api.upbit.com/v1/orders*)"
+  ]
+}

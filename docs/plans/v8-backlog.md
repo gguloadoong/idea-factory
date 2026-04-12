@@ -96,7 +96,7 @@ v7.1 의 `defaultMode: bypassPermissions` + narrow deny-list 는 무마찰 자�
 **스케치**: `templates/settings.json` 을 base 로 두고, 프로젝트 타입별 extension json 을 `templates/settings-extensions/{web-app,cron-bot,payment,trading}.json` 에 저장. `start-company` 스캐폴드 시 선택 적용.
 
 **의존성**: 5.2 (cron-bot 템플릿) 와 함께 하면 좋음.
-**상태**: `todo`
+**상태**: `done` — `templates/settings-extensions/{web-app,cron-bot,trading,payment}.json` 4종 + `scripts/merge-settings.sh` 병합 스크립트 + SKILL.md STEP 2 연동 + 10 assertions 테스트
 
 ### 1.4 Audit log post-session review agent [LOW / Medium]
 
