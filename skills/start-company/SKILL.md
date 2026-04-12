@@ -57,7 +57,13 @@ Create project at `~/{folder-name}/`:
    Reference: market-dashboard-v5 agents are 90+ lines each with career anchors
    and project-specific context. Aim for at least 50 lines per agent.
 3. `.claude/hooks/` — copy from `templates/hooks/`
-4. `.claude/settings.json` — from `templates/settings.json`
+4. `.claude/settings.json` — merge base `templates/settings.json` with type-specific deny-list:
+   `bash scripts/merge-settings.sh <project-type>` where project-type maps from service type:
+   - SaaS/content/internal-tool → `web-app`
+   - O2O/commerce → `payment`
+   - data → `cron-bot`
+   - trading (if detected in idea keywords) → `trading`
+   Write the merged output to `.claude/settings.json`.
 5. `.project/essence.md` — empty, filled in STEP 3
 6. `.project/PRD.md` — empty, filled in STEP 3
 7. `.project/decisions.md` — initialized with creation ADR

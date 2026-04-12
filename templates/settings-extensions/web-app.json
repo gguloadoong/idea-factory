@@ -1,0 +1,11 @@
+{
+  "_meta": {
+    "type": "web-app",
+    "description": "웹앱 기본 — base settings.json 에 추가할 항목 최소",
+    "evidence": "기본 프로젝트 타입, 추가 제한 불필요"
+  },
+  "deny": [
+    "Bash(vercel --prod*)",
+    "Bash(vercel deploy --prod*)"
+  ]
+}
