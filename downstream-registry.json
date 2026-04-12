@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "org": "gguloadoong",
+  "repos": [
+    { "name": "signalplay",          "type": "web-app",  "scaffolded": "2026-03-15", "enabled": true },
+    { "name": "chimp-pick",          "type": "web-app",  "scaffolded": "2026-03-20", "enabled": true },
+    { "name": "market-dashboard-v5", "type": "web-app",  "scaffolded": "2026-03-01", "enabled": true },
+    { "name": "trading-signal-bot",  "type": "trading",  "scaffolded": "2026-02-20", "enabled": true },
+    { "name": "bull-vs-bear",        "type": "web-app",  "scaffolded": "2026-03-10", "enabled": true },
+    { "name": "costock",             "type": "web-app",  "scaffolded": "2026-02-15", "enabled": true },
+    { "name": "reel-forge",          "type": "web-app",  "scaffolded": "2026-03-05", "enabled": true },
+    { "name": "aptner",              "type": "web-app",  "scaffolded": "2026-02-10", "enabled": true },
+    { "name": "catchflow",           "type": "web-app",  "scaffolded": "2026-03-25", "enabled": true },
+    { "name": "market-dashboard-v2", "type": "web-app",  "scaffolded": "2026-01-15", "enabled": true }
+  ]
+}
