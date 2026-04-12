@@ -184,7 +184,7 @@ idea-factory 템플릿이 업데이트되었으나 이 프로젝트에 반영되
          "--base", "main",
          "--title", f"chore: idea-factory 템플릿 동기화 ({today})",
          "--body", pr_body,
-         "--label", "ai-generated,chore"],
+        ],
         capture_output=True, text=True, timeout=30
     )
     if pr_result.returncode == 0:
