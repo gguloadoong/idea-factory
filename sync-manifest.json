@@ -1,0 +1,34 @@
+{
+  "managed": [
+    { "src": "templates/vercel.json",                             "dst": "vercel.json" },
+    { "src": "templates/.coderabbit.yaml",                        "dst": ".coderabbit.yaml" },
+    { "src": "templates/.github/workflows/label-pr.yml",          "dst": ".github/workflows/label-pr.yml" },
+    { "src": "templates/.github/workflows/ci.yml",                "dst": ".github/workflows/ci.yml" },
+    { "src": "templates/.github/labeler.yml",                     "dst": ".github/labeler.yml" },
+    { "src": "templates/.github/workflows/token-health.yml",      "dst": ".github/workflows/token-health.yml" },
+    { "src": "templates/.githooks/pre-push",                      "dst": ".githooks/pre-push" },
+    { "src": "templates/hooks/check-audit.sh",                    "dst": ".claude/hooks/check-audit.sh" },
+    { "src": "templates/hooks/check-decay-counter.sh",            "dst": ".claude/hooks/check-decay-counter.sh" },
+    { "src": "templates/hooks/check-loop-breaker.sh",             "dst": ".claude/hooks/check-loop-breaker.sh" },
+    { "src": "templates/hooks/check-claudemd-size.sh",            "dst": ".claude/hooks/check-claudemd-size.sh" },
+    { "src": "templates/hooks/stop-cost-summary.sh",              "dst": ".claude/hooks/stop-cost-summary.sh" },
+    { "src": "templates/hooks/stop-learning-capture.sh",          "dst": ".claude/hooks/stop-learning-capture.sh" },
+    { "src": "templates/hooks/check-quality.sh",                  "dst": ".claude/hooks/check-quality.sh" },
+    { "src": "templates/scripts/create-pr.sh",                    "dst": "scripts/create-pr.sh" },
+    { "src": "templates/scripts/run-architect.sh",                "dst": "scripts/run-architect.sh" },
+    { "src": "templates/scripts/review-summary.sh",               "dst": "scripts/review-summary.sh" },
+    { "src": "templates/scripts/validate-qa-evidence.sh",         "dst": "scripts/validate-qa-evidence.sh" },
+    { "src": "templates/scripts/pre-deploy-consensus.sh",         "dst": "scripts/pre-deploy-consensus.sh" },
+    { "src": "templates/scripts/update-project-docs.sh",          "dst": "scripts/update-project-docs.sh" }
+  ],
+  "computed": [
+    { "generator": "merge-settings", "dst": ".claude/settings.json", "note": "base + type extension 병합 결과와 비교" }
+  ],
+  "customized": [
+    "CLAUDE.md",
+    ".claude/agents/*.md",
+    ".project/essence.md",
+    ".project/PRD.md",
+    ".protected-files"
+  ]
+}
