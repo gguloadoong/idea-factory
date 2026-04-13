@@ -27,7 +27,7 @@ Build a virtual startup and deliver a working MVP.
 Launch two agents in parallel:
 
 **Agent 1** (analyst, opus): Analyze the idea.
-- Service name, folder name, service type (SaaS/O2O/commerce/content/data/internal-tool)
+- Service name, folder name, service type (SaaS/O2O/commerce/content/data/internal-tool), project type (web-app/cron-bot/trading/payment)
 - Core problem, target users, competitors, differentiation
 - Risk factors (tech, legal, business)
 - Output: structured analysis
@@ -45,7 +45,10 @@ After completing STEP 1, proceed immediately to STEP 2.
 Read templates from `~/.claude/templates/company/`.
 Create project at `~/{folder-name}/`:
 
-1. `CLAUDE.md` — from `templates/CLAUDE.md.tmpl`, replace `{{variables}}`.
+1. `CLAUDE.md` — choose template based on project type:
+   - **cron-bot/trading**: from `templates/cron-bot/CLAUDE.md.tmpl` (no UI/Playwright, yes reliability/monitoring rules)
+   - **web-app/payment**: from `templates/CLAUDE.md.tmpl`
+   Replace `{{variables}}`.
    **CRITICAL**: CLAUDE.md MUST be a full file (30-80 lines) with project rules, quality gates,
    and AI regression prevention. NEVER replace it with a single `@AGENTS.md` pointer.
    If variable substitution fails, copy the template as-is and fill manually in STEP 3.
@@ -57,7 +60,13 @@ Create project at `~/{folder-name}/`:
    Reference: market-dashboard-v5 agents are 90+ lines each with career anchors
    and project-specific context. Aim for at least 50 lines per agent.
 3. `.claude/hooks/` — copy from `templates/hooks/`
-4. `.claude/settings.json` — from `templates/settings.json`
+4. `.claude/settings.json` — merge base `templates/settings.json` with type-specific deny-list:
+   `bash scripts/merge-settings.sh <project-type>` where project-type maps from service type:
+   - SaaS/content/internal-tool → `web-app`
+   - O2O/commerce → `payment`
+   - data → `cron-bot`
+   - trading (if detected in idea keywords) → `trading`
+   Write the merged output to `.claude/settings.json`.
 5. `.project/essence.md` — empty, filled in STEP 3
 6. `.project/PRD.md` — empty, filled in STEP 3
 7. `.project/decisions.md` — initialized with creation ADR
@@ -65,7 +74,8 @@ Create project at `~/{folder-name}/`:
 9. `.github/workflows/ci.yml` — from `templates/.github/workflows/ci.yml`
 10. `.github/workflows/label-pr.yml` — from `templates/.github/workflows/label-pr.yml`
 11. `.github/labeler.yml` — from `templates/.github/labeler.yml`
-12. `vercel.json` — from `templates/vercel.json` (preview 배포 비활성화, production만)
+12. `vercel.json` — from `templates/vercel.json` (preview 배포 비활성화, production만).
+    **Vercel 연결 후 필수 설정**: Dashboard > Settings > Git > "Production Branch" = `main`, Preview Deployments = OFF
 13. `.coderabbit.yaml` — from `templates/.coderabbit.yaml`
 14. `src/CONTRACT.md` — from `templates/documents/CONTRACT.md.tmpl`, replace `{{FEATURE_NAME}}` with service name
 15. `.project/handoff/` — empty directory for phase transition documents (template: `templates/documents/handoff.md.tmpl`)
@@ -78,7 +88,13 @@ Create project at `~/{folder-name}/`:
 22. `.githooks/pre-push` — from `templates/.githooks/pre-push` (stale review warning)
 23. `.github/workflows/token-health.yml` — from `templates/.github/workflows/token-health.yml` (weekly token check)
 24. `.project/quality-baseline.md` — empty, generated after Phase 2 (from `templates/documents/quality-baseline.md.tmpl`)
-25. `git init` + `git config core.hooksPath .githooks` + initial commit
+25. **cron-bot/trading only** — additional files from `templates/cron-bot/scripts/`:
+    - `scripts/backtest.sh` — backtest runner (date range + config)
+    - `scripts/rollback.sh` — version rollback with audit logging
+    - `scripts/health-check.sh` — JSON health status reporter
+    - `templates/workflows/tuning-session.md` → `.project/tuning-protocol.md` (parameter tuning protocol)
+    - `.omc/experiments/` directory with README from `templates/experiments/README.md`
+26. `git init` + `git config core.hooksPath .githooks` + initial commit
 
 **Template variable reference**:
 - `{{SERVICE_NAME}}` — service name from analysis

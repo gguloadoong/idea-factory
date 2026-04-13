@@ -2,5 +2,13 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
-  "ignoreCommand": "if [ \"$VERCEL_ENV\" != \"production\" ]; then exit 0; fi; exit 1"
+  "ignoreCommand": "if [ \"$VERCEL_ENV\" != \"production\" ]; then exit 0; fi; exit 1",
+  "git": {
+    "deploymentEnabled": {
+      "main": true,
+      "feature/*": false,
+      "fix/*": false,
+      "chore/*": false
+    }
+  }
 }

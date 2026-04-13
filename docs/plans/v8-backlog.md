@@ -96,7 +96,7 @@ v7.1 의 `defaultMode: bypassPermissions` + narrow deny-list 는 무마찰 자�
 **스케치**: `templates/settings.json` 을 base 로 두고, 프로젝트 타입별 extension json 을 `templates/settings-extensions/{web-app,cron-bot,payment,trading}.json` 에 저장. `start-company` 스캐폴드 시 선택 적용.
 
 **의존성**: 5.2 (cron-bot 템플릿) 와 함께 하면 좋음.
-**상태**: `todo`
+**상태**: `done` — `templates/settings-extensions/{web-app,cron-bot,trading,payment}.json` 4종 + `scripts/merge-settings.sh` 병합 스크립트 + SKILL.md STEP 2 연동 + 10 assertions 테스트
 
 ### 1.4 Audit log post-session review agent [LOW / Medium]
 
@@ -140,7 +140,7 @@ v7.1 까지 idea-factory 는 자체 리서치/결정/학습을 체계적으로 �
 **증거**: 이번 세션 자체. 만약 사용자가 "기록 안 하나?" 하고 물어보지 않았다면 두 개의 심층 리서치 리포트가 그냥 증발했을 것.
 
 **의존성**: 없음.
-**상태**: `todo`
+**상태**: `done` (2026-04-12, `templates/hooks/stop-learning-capture.sh` — Stop 훅. 학습층 디렉터리 존재 + 20+ audit 엔트리 시 4가지 학습 카테고리 기록 제안. 8 assertions 통과)
 
 ### 2.5 Research artifact template [LOW / Small]
 
@@ -168,7 +168,7 @@ v7.1 은 많은 중요한 룰을 **CLAUDE.md 산문** 으로 기록. 하지만 J
 **스케치**: Stop 훅 또는 PostToolUse 가 최근 N 커맨드/에디트 를 비교, near-identical repeat (예: 같은 파일의 같은 라인을 3번 수정) 감지 시 hard stop + CEO 에스컬레이션. CLAUDE.md 룰은 유지하되 훅이 안전망.
 
 **의존성**: 1.1 (audit log) 가 있으면 더 정확한 탐지 가능.
-**상태**: `todo`
+**상태**: `done` (2026-04-12, `templates/hooks/check-loop-breaker.sh` — PostToolUse Write|Edit 훅. 같은 파일 3회 수정 시 WARNING, 5회 시 ESCALATE. 11 assertions 통과)
 
 ### 3.2 AST-level CONTRACT enforcement [MED / Large]
 
@@ -209,17 +209,29 @@ v7.1 은 많은 중요한 룰을 **CLAUDE.md 산문** 으로 기록. 하지만 J
 
 # Theme 4: Context & Memory
 
-### 4.1 Instruction compliance decay counter + rule reinjection [MED / Medium]
+### 4.1 Instruction compliance decay counter + rule reinjection + anti-quit [HIGH / Medium]
 
 **문제**: Khare decay curve — 메시지 5-6 이후 CLAUDE.md 룰 준수율 20-60%. 현재 idea-factory 는 세션 길이 카운터 없음. 중반 이후 핵심 룰을 재주입할 방법 없음.
+
+이 decay 의 대표적 증상 두 가지:
+1. **자의적 작업 중단 (anti-quit)**: 모델이 "오늘은 여기까지", "다음 세션에서 이어하자" 등 학습 데이터 패턴에 의해 스스로 작업을 중단. Claude 에는 피로·일일 한도 없으므로 이는 instruction decay 로 인한 잘못된 행동.
+2. **반복 실패 루프 진입**: 컨텍스트 오염으로 이전의 틀린 접근법을 재참조하며 같은 버그를 수십 회 반복. (3.1 circuit breaker 와 연동)
 
 **증거**: 
 - `docs/research/2026-04-11-tsb-harness-external.md` Part 2 Failure Mode 4 (Jaroslawicz et al. 2025)
 - https://dev.to/siddhantkcode/an-easy-way-to-stop-claude-code-from-forgetting-the-rules-h36
+- 2026-04-12 사용자 리포트: 4개 터미널에서 동시에 자의적 중단 + 무한 루프 관찰
 
-**스케치**: PreToolUse 훅 (exit 0 로깅과 통합) 이 N 메시지마다 or 토큰 임계값마다 critical invariants 를 `<system-reminder>` 로 재주입.
+**스케치**:
+1. **PreToolUse 훅 (exit 0)**: N 메시지마다 or 토큰 임계값마다 critical invariants 를 `<system-reminder>` 로 재주입. 재주입 대상 핵심 규칙:
+   - "사용자가 명시적으로 중단 요청하기 전까지 자의적으로 작업을 중단하지 않는다"
+   - "같은 접근법 3회 실패 시 근본 원인 분석 후 다른 전략으로 전환하거나 escalate"
+   - 현재 세션의 핵심 목표 리마인더
+2. **CLAUDE.md 템플릿 즉시 반영**: 훅 구현 전에도 prose rule 로 anti-quit 규칙 선행 배치 (v7.1 에서 바로 적용 가능)
+3. **3.1 circuit breaker 와 연동**: decay counter 가 감지한 "반복 패턴" 정보를 3.1 에 전달
 
-**상태**: `todo`
+**의존성**: 없음 (독립 착수 가능). 3.1 과 시너지.
+**상태**: `done` (2026-04-12, `templates/hooks/check-decay-counter.sh` — PreToolUse 훅. 40회 도구 호출마다 anti-quit + circuit breaker + context hygiene 규칙 재주입. CLAUDE.md 템플릿에도 prose rule 선행 배치. 12 assertions 통과)
 
 ### 4.2 Auto-compact loss validation for handoff docs [LOW / Large]
 
@@ -258,7 +270,7 @@ v7 까지 idea-factory 는 암묵적으로 **"웹앱 + Playwright UI"** 를 가�
 - Numerical ADR 포맷 (decisions.md 변종)
 
 **트레이딩 봇 외 적용 가능**: ML 하이퍼파라미터 튜닝, 추천 시스템 가중치, 가격 engine 파라미터.
-**상태**: `todo`
+**상태**: `done` — `templates/workflows/tuning-session.md` 프로토콜 + `scripts/tuning-gate.sh` advisory 게이트 + `templates/experiments/README.md` + 17 assertions 테스트
 
 ### 5.2 Cron-bot project template [HIGH / Large]
 
@@ -276,7 +288,7 @@ v7 까지 idea-factory 는 암묵적으로 **"웹앱 + Playwright UI"** 를 가�
 
 **`start-company` 분기**: "이 프로젝트는 웹앱 인가요 봇 인가요?" 질문을 킥오프에 추가.
 **의존성**: 5.1 (tuning harness) 와 자연스럽게 통합됨.
-**상태**: `todo`
+**상태**: `done` — `templates/cron-bot/` (CLAUDE.md.tmpl + scripts/backtest.sh + scripts/rollback.sh + scripts/health-check.sh + README.md)
 
 ### 5.3 Runtime metrics quality ratchet variant [MED / Medium]
 
@@ -404,6 +416,22 @@ v7 까지 idea-factory 는 암묵적으로 **"웹앱 + Playwright UI"** 를 가�
 
 **의존성**: 없음.
 **상태**: `in-progress` (PR #12, 2026-04-11. 머지 시 `done` 로 업데이트)
+
+### 7.4 Template-to-downstream sync mechanism [HIGH / Large]
+
+**문제**: idea-factory 의 가장 큰 구조적 결함. 템플릿을 개선해도 이미 스캐폴드된 프로젝트에는 전파되지 않음. `vercel.json` ignoreCommand 누락으로 8개 레포에서 불필요한 Vercel 과금이 발생한 것이 실증 사례. `settings.json`, `hooks/`, `CLAUDE.md` 전부 같은 문제를 갖고 있음.
+
+**증거**: 2026-04-13 Vercel 과금 사건 — trading-signal-bot(ignoreCommand 누락), costock(문법 오류), signalplay/chimp-pick/aptner(exit 1 누락). 전부 스캐폴드 시점의 불완전한 템플릿이 원인. `docs/field-reports/2026-04-13-vercel-billing-incident.md` 참조.
+
+**스케치**:
+- `scripts/sync-downstream.sh` — idea-factory 템플릿과 다운스트림 프로젝트의 drift 감지
+- 동기화 대상 파일 목록: `vercel.json`, `.claude/settings.json`, `.claude/hooks/*`, `.coderabbit.yaml`, `.github/workflows/*`
+- 동작 모드: (1) `--check` drift 리포트만, (2) `--apply` PR 자동 생성
+- 각 다운스트림 프로젝트에 `.idea-factory-version` 파일로 스캐폴드 시점 추적
+- cron 또는 수동 실행
+
+**의존성**: 없음. 독립 착수 가능.
+**상태**: `done` — `scripts/sync-downstream.sh` + `scripts/sync-lib.py` (gh API 기반, 클론 불필요) + `downstream-registry.json` (10개 레포) + `sync-manifest.json` (20 managed + 1 computed + 5 customized) + 10 assertions 테스트. 첫 실행 결과: 48 drifted, 145 missing across 10 repos.
 
 ---
 
