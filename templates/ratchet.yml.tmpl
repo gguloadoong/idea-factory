@@ -1,0 +1,29 @@
+# .ratchet.yml — Runtime Metrics Quality Ratchet
+#
+# Usage: bash scripts/runtime-ratchet.sh --config .ratchet.yml [--check|--update] [--allow-exec]
+#
+# --check   Compare current metrics against baseline; warn on regression.
+# --update  Collect current metrics and save as the new baseline.
+# --allow-exec  Required to actually run source commands (security gate).
+#
+# direction values:
+#   lower_is_better  — regression when current > baseline * (1 + threshold)
+#   higher_is_better — regression when current < baseline * (1 - threshold)
+#
+# threshold is a fractional tolerance (e.g. 0.05 = 5% regression allowed).
+
+metrics:
+  - name: error_rate
+    source: "curl -s $METRICS_URL/error_rate"
+    threshold: 0.05
+    direction: lower_is_better
+
+  - name: latency_p99
+    source: "curl -s $METRICS_URL/latency_p99"
+    threshold: 500
+    direction: lower_is_better
+
+  - name: success_rate
+    source: "curl -s $METRICS_URL/success_rate"
+    threshold: 0.05
+    direction: higher_is_better

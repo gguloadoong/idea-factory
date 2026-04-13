@@ -1,0 +1,15 @@
+# Copied Files Registry
+
+이 프로젝트에서 다른 프로젝트의 코드를 복사한 파일 목록.
+`scripts/check-copy-drift.sh` 가 이 파일을 읽어서 상류와의 drift를 감지합니다.
+
+## 등록 형식
+
+| 로컬 파일 | 상류 레포 | 상류 경로 | 복사 시점 커밋 | 동기화 정책 |
+|-----------|-----------|----------|--------------|-----------|
+| `src/_ta-core.js` | `owner/upstream-repo` | `src/taCalculator.js` | `abc1234` | `manual` |
+
+## 동기화 정책
+- `manual` — drift 경고만, 수동 동기화
+- `alert` — drift 감지 시 이슈 생성 권고
+- `ignore` — drift 무시 (의도적 fork)

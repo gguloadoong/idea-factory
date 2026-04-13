@@ -1,0 +1,34 @@
+# contract-rules — 기계적으로 강제되는 코드 제약
+# CONTRACT.md의 FAQ는 "왜"를 설명, 이 파일은 "무엇을" 차단
+#
+# 각 규칙은 grep/regex 패턴으로 정의. AST 분석은 ast-grep 있을 때만.
+#
+# 사용법: bash scripts/check-contract.sh --rules templates/contract-rules/example-rules.yml
+
+rules:
+  - id: no-ta-cache-param
+    description: "taCache 파라미터는 v7에서 제거됨 — 성능 문제"
+    pattern: "taCache"
+    files:
+      - "**/*signal*.js"
+      - "**/*engine*.js"
+    action: warn
+    contract_ref: "CONTRACT.md #why-no-ta-cache"
+
+  - id: no-global-state
+    description: "전역 상태 변수 금지 — 테스트 격리 불가"
+    pattern: "(?:var|let)\\s+\\w+\\s*=.*global|window\\."
+    files:
+      - "src/**/*.js"
+      - "src/**/*.ts"
+    action: warn
+    contract_ref: "CONTRACT.md #no-global-state"
+
+  - id: no-sync-file-ops
+    description: "동기 파일 I/O 금지 — 이벤트 루프 블로킹"
+    pattern: "(?:readFileSync|writeFileSync|appendFileSync)"
+    files:
+      - "src/**/*.js"
+      - "src/**/*.ts"
+    action: warn
+    contract_ref: "CONTRACT.md #async-io-only"

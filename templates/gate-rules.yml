@@ -1,0 +1,37 @@
+# gate-rules.yml — 파일 패턴별 리뷰어 매핑
+# run-gate.sh 가 변경 파일 패턴에 따라 적절한 리뷰어 세트 선택
+#
+# match: glob 패턴 (단일 문자열 또는 리스트)
+#   - "**" 는 모든 디렉터리 매칭
+#   - "{a,b}" brace expansion 지원 (run-gate.sh 가 확장)
+# reviewers: 리뷰어 목록 (비어있으면 리뷰 불필요)
+# reason: 사유 메모
+
+rules:
+  - match: "*.md"
+    reviewers: []
+    reason: "문서 변경은 리뷰 불필요"
+
+  - match: "src/auth/**"
+    reviewers: [architect, critic, code-reviewer, security-reviewer]
+    reason: "인증/보안 코드는 최대 리뷰"
+
+  - match: ["**/*engine*.js", "**/*engine*.ts", "**/*signal*.js"]
+    reviewers: [architect, code-reviewer]
+    reason: "코어 엔진 코드"
+
+  - match: "src/**/*.{tsx,jsx}"
+    reviewers: [architect, code-reviewer, qa-tester]
+    reason: "UI 컴포넌트"
+
+  - match: ["*.config.*", "tsconfig*", ".eslintrc*"]
+    reviewers: [architect]
+    reason: "설정 파일 변경"
+
+  - match: "**/*.test.*"
+    reviewers: [code-reviewer]
+    reason: "테스트 파일"
+
+default:
+  reviewers: [architect, code-reviewer]
+  reason: "기본 리뷰 세트"

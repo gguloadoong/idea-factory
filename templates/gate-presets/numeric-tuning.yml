@@ -1,0 +1,33 @@
+# numeric-tuning.yml — 파라미터 튜닝 전용 2-reviewer gate preset
+#
+# 사용법: GATE_RULES=templates/gate-presets/numeric-tuning.yml bash scripts/run-gate.sh
+# 또는 프로젝트의 gate-rules.yml 에 이 규칙들을 직접 복사
+#
+# 대상: ML 하이퍼파라미터, 트레이딩 시그널 상수, 추천 가중치, 가격 엔진 파라미터
+#
+# 리뷰어 역할:
+#   architect    — 구조/불변 체크 (수치 범위, 단위, 타입 안전성)
+#   code-reviewer — 코드 품질 + backtest 결과 대조
+
+rules:
+  - match: ["**/*config*.json", "**/*params*.json", "**/*constants*.js", "**/*constants*.ts"]
+    reviewers: [architect]
+    reason: "파라미터 설정 파일 — 구조/불변 체크"
+    model: opus
+
+  - match: ["**/*threshold*", "**/*weight*", "**/*factor*", "**/*ratio*"]
+    reviewers: [architect]
+    reason: "수치 파라미터 파일"
+    model: opus
+
+  - match: ["**/decisions.md", "**/DECISIONS.md"]
+    reviewers: []
+    reason: "ADR 기록 파일은 리뷰 불필요"
+
+  - match: "*.md"
+    reviewers: []
+    reason: "문서 변경은 리뷰 불필요"
+
+default:
+  reviewers: [architect, code-reviewer]
+  reason: "튜닝 외 코드 변경은 기본 2-reviewer"

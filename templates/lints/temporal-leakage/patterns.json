@@ -1,0 +1,47 @@
+{
+  "description": "Temporal leakage detection patterns for time-series/trading code",
+  "patterns": [
+    {
+      "id": "shift_negative",
+      "regex": "\\.shift\\s*\\(\\s*-\\d+",
+      "severity": "HIGH",
+      "description": "shift(-N)은 미래 데이터 참조 (lookahead bias)",
+      "languages": ["python"]
+    },
+    {
+      "id": "iloc_negative_in_loop",
+      "regex": "iloc\\s*\\[\\s*-1\\s*\\]",
+      "severity": "WARN",
+      "description": "iloc[-1]이 루프 내에서 미래 행을 참조할 수 있음",
+      "languages": ["python"]
+    },
+    {
+      "id": "unseeded_random",
+      "regex": "(?:random\\.(?:random|randint|choice|uniform|gauss)\\(|np\\.random\\.(?:rand|randn|randint|choice)\\()(?!.*seed)",
+      "severity": "WARN",
+      "description": "시드 없는 난수는 백테스트 재현 불가",
+      "languages": ["python"]
+    },
+    {
+      "id": "future_merge_keys",
+      "regex": "merge\\(.*how\\s*=\\s*['\"](?:inner|left|right|outer)['\"]",
+      "severity": "INFO",
+      "description": "merge 시 날짜 정렬/필터 없으면 미래 데이터 포함 가능",
+      "languages": ["python"]
+    },
+    {
+      "id": "js_negative_shift",
+      "regex": "\\.slice\\s*\\(\\s*-\\d+\\s*\\)",
+      "severity": "WARN",
+      "description": "JS slice(-N)이 시계열에서 미래 참조일 수 있음",
+      "languages": ["javascript", "typescript"]
+    },
+    {
+      "id": "math_random_unseeded",
+      "regex": "Math\\.random\\(\\)",
+      "severity": "WARN",
+      "description": "Math.random()은 시드 불가, 백테스트 재현 불가",
+      "languages": ["javascript", "typescript"]
+    }
+  ]
+}
