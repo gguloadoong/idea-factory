@@ -30,6 +30,11 @@
             "type": "command",
             "command": "bash .claude/hooks/check-failed-attempts.sh",
             "timeout": 5000
+          },
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/check-pending-prs.sh",
+            "timeout": 5000
           }
         ]
       }
