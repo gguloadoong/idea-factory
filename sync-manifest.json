@@ -26,7 +26,9 @@
     { "src": "templates/mcp/supabase.json",                       "dst": ".claude/mcp/supabase.json" },
     { "src": "templates/mcp/vercel.json",                         "dst": ".claude/mcp/vercel.json" },
     { "src": "templates/mcp/README.md",                           "dst": ".claude/mcp/README.md" },
-    { "src": "templates/mcp/merge-example.sh",                    "dst": ".claude/mcp/merge-example.sh" }
+    { "src": "templates/mcp/merge-example.sh",                    "dst": ".claude/mcp/merge-example.sh" },
+    { "src": "templates/routines/idea-to-mvp.yaml",               "dst": ".claude/routines/idea-to-mvp.yaml" },
+    { "src": "templates/routines/README.md",                      "dst": ".claude/routines/README.md" }
   ],
   "computed": [
     { "generator": "merge-settings", "dst": ".claude/settings.json", "note": "base + type extension 병합 결과와 비교" }

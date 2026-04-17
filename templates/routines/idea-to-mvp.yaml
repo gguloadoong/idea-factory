@@ -1,0 +1,119 @@
+# idea-to-mvp — Claude Code Routine definition
+#
+# NOTE: As of 2026-04-14, Claude Code Routines do not use a file-based YAML
+# schema. Routines are created and managed via:
+#   - Web UI:  https://claude.ai/code/routines
+#   - CLI:     /schedule (or /schedule daily ... )
+#   - Desktop: New task > New remote task
+#
+# This file documents the intended configuration as a reference template.
+# Copy the values below into the web creation form or use `/schedule` in CLI.
+# Adjust field names if Anthropic ships a file-based schema in a future release.
+#
+# Reference: https://code.claude.com/docs/en/routines
+# Beta header (API trigger): anthropic-beta: experimental-cc-routine-2026-04-01
+
+routine:
+  name: idea-to-mvp
+  description: >
+    One-line idea arrives via GitHub Issue (label: idea) →
+    runs /start-company → opens a PR → posts result link to Discord webhook.
+
+  # -----------------------------------------------------------------
+  # Prompt — the most important field; must be self-contained.
+  # Routines run autonomously with no approval prompts.
+  # -----------------------------------------------------------------
+  prompt: |
+    A new GitHub Issue has been opened with the label "idea".
+    The issue body contains a one-line business idea.
+
+    Steps:
+    1. Read the issue body and extract the one-line idea text.
+    2. Run `/start-company "<idea>"` inside a new subdirectory named
+       after the issue number (e.g. idea-<ISSUE_NUMBER>/).
+       Create the subdirectory first if it does not exist.
+    3. Wait for /start-company to complete and locate the resulting PR URL.
+    4. Send a POST request to the Discord webhook URL stored in the
+       environment variable DISCORD_WEBHOOK_URL with a JSON body:
+         {
+           "content": "New MVP scaffold ready for idea #<ISSUE_NUMBER>: <idea>\nPR: <PR_URL>"
+         }
+    5. Comment on the original GitHub Issue with the PR URL so the
+       requester can track progress.
+
+    Success criteria:
+    - A PR exists in the repository with the scaffold for the idea.
+    - The Discord webhook received the notification message.
+    - The original Issue has a comment linking to the PR.
+
+  # -----------------------------------------------------------------
+  # Repositories — cloned fresh on every run; Claude pushes to
+  # claude/-prefixed branches unless unrestricted pushes are enabled.
+  # -----------------------------------------------------------------
+  repositories:
+    - repo: "${GITHUB_REPO}"          # e.g. your-org/your-monorepo
+      default_branch: main
+      allow_unrestricted_branch_pushes: false   # Claude pushes to claude/* branches
+
+  # -----------------------------------------------------------------
+  # Environment — variables injected at runtime; never hardcode values.
+  # Configure these in Claude Cloud environment settings:
+  #   https://claude.ai/code/routines (Settings > Environments)
+  # -----------------------------------------------------------------
+  environment:
+    variables:
+      DISCORD_WEBHOOK_URL: "${DISCORD_WEBHOOK_URL}"   # Discord Incoming Webhook URL
+      GITHUB_TOKEN: "${GITHUB_TOKEN}"                 # GitHub token with repo scope
+      GITHUB_REPO: "${GITHUB_REPO}"                   # owner/repo of the target repo
+
+  # -----------------------------------------------------------------
+  # Triggers — this routine uses a GitHub event trigger.
+  # Additional schedule or API triggers can be added in the web UI.
+  # -----------------------------------------------------------------
+  triggers:
+    - type: github
+      event: pull_request        # closest available; use "issues" when supported
+      # _note: As of research preview, supported GitHub events are
+      #        "pull_request" and "release". Issues webhook support
+      #        may be added in a future release. Until then, use the
+      #        API trigger below as the primary entry point.
+      repository: "${GITHUB_REPO}"
+      filters:
+        labels:
+          - idea
+        is_draft: false
+
+    # Alternative: API trigger — fire this routine from any system
+    # that can make an authenticated HTTP POST (e.g. a GitHub Actions
+    # workflow that fires when an Issue with label "idea" is opened).
+    #
+    # curl -X POST https://api.anthropic.com/v1/claude_code/routines/<ROUTINE_ID>/fire \
+    #   -H "Authorization: Bearer ${ROUTINE_API_TOKEN}" \
+    #   -H "anthropic-beta: experimental-cc-routine-2026-04-01" \
+    #   -H "anthropic-version: 2023-06-01" \
+    #   -H "Content-Type: application/json" \
+    #   -d '{"text": "Issue #42: A social network for cats"}'
+    - type: api
+      _note: >
+        API token is generated after the routine is saved in the web UI.
+        Store the token as ROUTINE_API_TOKEN in your secret store.
+        The ROUTINE_ID is visible in the routine's detail page URL.
+
+  # -----------------------------------------------------------------
+  # Connectors — MCP connectors included in every run.
+  # Remove any that this routine does not need to limit surface area.
+  # -----------------------------------------------------------------
+  connectors:
+    - github     # required for cloning, PR creation, and Issue comments
+    # - slack    # optional: add if you prefer Slack over Discord webhook
+    # - linear   # optional: add for issue tracker integration
+
+  # -----------------------------------------------------------------
+  # Daily quota reminder (as of 2026-04-14 research preview)
+  # Pro: 5 runs/day | Max: 15/day | Team/Enterprise: 25/day
+  # Extra runs available with additional usage (Settings > Billing).
+  # -----------------------------------------------------------------
+  _quota_note: >
+    Each run of this routine counts as 1 toward your daily routine limit.
+    With Pro (5/day), plan accordingly if you expect bursts of new ideas.
+    Upgrade to Max or Team for higher throughput.
