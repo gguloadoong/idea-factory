@@ -1,0 +1,94 @@
+name: Sync Downstream
+
+# Manual-only trigger (no auto-trigger on push).
+# Runaway PR creation across 10 downstream repos would be catastrophic —
+# keep the gate human.
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Mode: `check` produces a drift report only; `apply` creates PRs in drifted repos'
+        required: true
+        default: check
+        type: choice
+        options:
+          - check
+          - apply
+      repo:
+        description: 'Target a specific downstream repo (optional). Leave empty to run against the full registry.'
+        required: false
+        default: ''
+        type: string
+      verbose:
+        description: 'Verbose output (file-level diffs)'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out idea-factory
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Verify SYNC_PAT is available
+        env:
+          SYNC_PAT: ${{ secrets.SYNC_PAT }}
+        run: |
+          if [ -z "${SYNC_PAT}" ]; then
+            echo "::error::SYNC_PAT secret is not set."
+            echo ""
+            echo "Create a GitHub Personal Access Token with 'repo' scope and write access"
+            echo "to every repository in downstream-registry.json, then add it as a repository"
+            echo "secret named SYNC_PAT:"
+            echo "  Settings → Secrets and variables → Actions → New repository secret"
+            echo ""
+            echo "See docs/sync-downstream-workflow.md for the full setup guide."
+            exit 1
+          fi
+          echo "SYNC_PAT is set — proceeding."
+
+      - name: Run sync-downstream
+        env:
+          GH_TOKEN: ${{ secrets.SYNC_PAT }}
+          GITHUB_TOKEN: ${{ secrets.SYNC_PAT }}
+        run: |
+          set -u
+
+          ARGS="--${{ inputs.mode }}"
+
+          if [ -n "${{ inputs.repo }}" ]; then
+            ARGS="$ARGS --repo ${{ inputs.repo }}"
+          fi
+
+          if [ "${{ inputs.verbose }}" = "true" ]; then
+            ARGS="$ARGS --verbose"
+          fi
+
+          echo "::group::sync-downstream.sh $ARGS"
+          # Note: sync-downstream.sh always exits 0 (idea-factory invariant).
+          # Real errors surface via stderr + the drift/PR report.
+          bash scripts/sync-downstream.sh $ARGS
+          echo "::endgroup::"
+
+      - name: Post-run summary
+        if: always()
+        run: |
+          echo "### Sync Downstream Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Mode**: \`${{ inputs.mode }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Target**: \`${{ inputs.repo == '' && 'all registered downstream repos' || inputs.repo }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Verbose**: \`${{ inputs.verbose }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Check the job log above for the drift report or created PR links." >> "$GITHUB_STEP_SUMMARY"
