@@ -30,6 +30,10 @@
   "customized": [
     "CLAUDE.md",
     ".claude/agents/*.md",
+    ".claude/rules/commit.md",
+    ".claude/rules/security.md",
+    ".claude/rules/code-style.md",
+    ".claude/rules/ai-regression.md",
     ".project/essence.md",
     ".project/PRD.md",
     ".protected-files"
