@@ -1,0 +1,113 @@
+# observability/filter-rules.yaml
+# Secret masking patterns and event exclusion rules for observability-push.sh
+#
+# mask_patterns  — regex list applied to all string fields before webhook send
+# exclude_events — tool names whose PostToolUse events are always suppressed
+#
+# Reference: templates/hooks/observability-push.sh (inline Python masking)
+# Note: patterns here are documentation/config; the hook reads them implicitly
+#       via the inline regex list. A future version may load this file directly.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Secret / credential masking patterns
+# Each entry: pattern (Python re syntax) + replacement string
+# ─────────────────────────────────────────────────────────────────────────────
+mask_patterns:
+
+  # AWS credentials
+  - pattern: "AKIA[0-9A-Z]{16}"
+    replacement: "[REDACTED-AWS-KEY]"
+    description: "AWS Access Key ID"
+
+  - pattern: "ASIA[0-9A-Z]{16}"
+    replacement: "[REDACTED-AWS-STS]"
+    description: "AWS STS temporary key"
+
+  # OpenAI / Anthropic / generic sk- keys
+  - pattern: "sk-[A-Za-z0-9]{20,}"
+    replacement: "[REDACTED-SK-KEY]"
+    description: "OpenAI or Anthropic API key"
+
+  # GitHub tokens
+  - pattern: "ghp_[A-Za-z0-9]{36}"
+    replacement: "[REDACTED-GHP]"
+    description: "GitHub Personal Access Token"
+
+  - pattern: "gho_[A-Za-z0-9]{36}"
+    replacement: "[REDACTED-GHO]"
+    description: "GitHub OAuth token"
+
+  - pattern: "ghs_[A-Za-z0-9]{36}"
+    replacement: "[REDACTED-GHS]"
+    description: "GitHub server-to-server token"
+
+  # Slack tokens
+  - pattern: "xoxb-[0-9]+-[A-Za-z0-9-]+"
+    replacement: "[REDACTED-SLACK-BOT]"
+    description: "Slack bot token"
+
+  - pattern: "xoxp-[0-9]+-[A-Za-z0-9-]+"
+    replacement: "[REDACTED-SLACK-USER]"
+    description: "Slack user token"
+
+  # Google API keys
+  - pattern: "AIza[0-9A-Za-z_-]{35}"
+    replacement: "[REDACTED-GOOGLE]"
+    description: "Google API key"
+
+  # Generic Bearer tokens (Authorization header values)
+  - pattern: "Bearer\\s+[A-Za-z0-9\\-._~+/]{20,}"
+    replacement: "[REDACTED-BEARER]"
+    description: "HTTP Authorization Bearer token"
+
+  # Passwords embedded in strings
+  - pattern: "password[\"'\\s:=]+[^\\s\"']{4,}"
+    replacement: "[REDACTED-PASSWORD]"
+    description: "Inline password value"
+    flags: "IGNORECASE"
+
+  # Email addresses (PII)
+  - pattern: "[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}"
+    replacement: "[REDACTED-EMAIL]"
+    description: "Email address (PII)"
+
+  # Unfilled template placeholders — e.g. ${SUPABASE_ACCESS_TOKEN}
+  - pattern: "\\$\\{[A-Z_][A-Z0-9_]*\\}"
+    replacement: "[UNFILLED-PLACEHOLDER]"
+    description: "Unsubstituted env-var placeholder (double-check scaffold)"
+
+  # Vercel tokens
+  - pattern: "vercel_[A-Za-z0-9]{24,}"
+    replacement: "[REDACTED-VERCEL]"
+    description: "Vercel API token"
+    flags: "IGNORECASE"
+
+  # Supabase service role keys (long JWT-shaped strings after 'service_role')
+  - pattern: "service_role\\.[A-Za-z0-9+/=]{40,}"
+    replacement: "[REDACTED-SUPABASE-SR]"
+    description: "Supabase service role key segment"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Excluded events — PostToolUse tool names that are NEVER forwarded
+# Purpose: prevent infinite loops and reduce noise from internal tooling
+# ─────────────────────────────────────────────────────────────────────────────
+exclude_events:
+
+  # The hook itself — calling observability-push.sh would create a loop
+  - tool: "observability-push"
+    reason: "Infinite loop prevention — the hook must not observe itself"
+
+  # Audit log hook — internal governance, not product activity
+  - tool: "check-audit"
+    reason: "Internal audit machinery; not meaningful to external observers"
+
+  # High-frequency read tools — too noisy at normal/minimal levels
+  # These are only emitted at verbose level via the filter_level gate in the hook
+  - tool: "Read"
+    reason: "High-frequency; use verbose level if you want file reads"
+
+  - tool: "Glob"
+    reason: "High-frequency file search; verbose level only"
+
+  - tool: "Grep"
+    reason: "High-frequency search; verbose level only"

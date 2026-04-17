@@ -31,7 +31,10 @@
     { "src": "templates/routines/README.md",                      "dst": ".claude/routines/README.md" },
     { "src": "templates/agent-teams/web-app-team.yaml",           "dst": ".claude/agent-teams/web-app-team.yaml" },
     { "src": "templates/agent-teams/cron-bot-team.yaml",          "dst": ".claude/agent-teams/cron-bot-team.yaml" },
-    { "src": "templates/agent-teams/README.md",                   "dst": ".claude/agent-teams/README.md" }
+    { "src": "templates/agent-teams/README.md",                   "dst": ".claude/agent-teams/README.md" },
+    { "src": "templates/hooks/observability-push.sh",            "dst": ".claude/hooks/observability-push.sh" },
+    { "src": "templates/observability/README.md",                "dst": ".claude/observability/README.md" },
+    { "src": "templates/observability/filter-rules.yaml",        "dst": ".claude/observability/filter-rules.yaml" }
   ],
   "computed": [
     { "generator": "merge-settings", "dst": ".claude/settings.json", "note": "base + type extension 병합 결과와 비교" }

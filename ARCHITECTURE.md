@@ -296,6 +296,34 @@ Shipped on `feature/#30-agent-teams`. Scaffold merged into `templates/agent-team
 
 See `templates/agent-teams/README.md` for Korean activation guide and usage decision matrix.
 
+### Multi-Agent Observability (Discord / Telegram Push)
+
+Shipped on `feature/#31-observability`. Scaffold in `templates/hooks/observability-push.sh`
+and `templates/observability/`.
+
+- **Purpose**: live visibility into parallel agent activity — which tool fired, which Task
+  was spawned, which story is running — pushed to Discord or Telegram in real time.
+  Addresses the top community pain point: "autonomous loops are opaque".
+- **Hook**: `templates/hooks/observability-push.sh` — PostToolUse only, exits 0
+  unconditionally. Never PreToolUse (v7.1 safety invariant).
+- **Trigger wiring** (opt-in, not in base `settings.json`):
+  ```json
+  { "matcher": "Task|Stop|SessionStart",
+    "hooks": [{ "type": "command",
+                "command": "bash .claude/hooks/observability-push.sh",
+                "timeout": 8000 }] }
+  ```
+- **Masking**: `templates/observability/filter-rules.yaml` — regex list covering
+  AWS keys, OpenAI/Anthropic sk- keys, GitHub tokens, Slack tokens, Google API keys,
+  Bearer headers, passwords, email addresses, and unfilled `${VAR}` placeholders.
+- **Env**:
+  - `OBSERVABILITY_WEBHOOK_URL` (required) — Discord webhook or Telegram bot URL
+  - `OBSERVABILITY_TYPE` — `discord` (default) | `telegram`
+  - `OBSERVABILITY_FILTER_LEVEL` — `minimal` | `normal` (default) | `verbose`
+  - `OBSERVABILITY_DEBUG=1` — stderr-only dry run, no network call
+- **Guide**: `templates/observability/README.md` (Korean setup + security notes)
+- **Reference pattern**: disler/claude-code-hooks-multi-agent-observability
+
 ### Planned Adoptions (Week 3+ backlog)
 
 - **Plugin Marketplace**: package idea-factory as an official plugin (`anthropics/claude-plugins-official`) for one-command install.
