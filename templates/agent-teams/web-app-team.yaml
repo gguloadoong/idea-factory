@@ -1,0 +1,124 @@
+# web-app-team.yaml
+#
+# Agent Teams 프리셋 — 웹 애플리케이션 MVP 병렬 빌드
+#
+# 사용법:
+#   팀 리드 세션(main /start-company)에서 자연어로 팀 생성을 요청한다.
+#   예: "Create an agent team using the web-app-team preset: spawn a
+#       frontend-worker, backend-worker, and test-worker."
+#
+# 전제 조건:
+#   CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 활성화 필요 (README.md 참조)
+#   Claude Code v2.1.32 이상
+#
+# _note: Agent Teams의 팀 설정(~/.claude/teams/)은 런타임에 자동 생성된다.
+#   이 파일은 YAML 프리셋 레퍼런스다. 팀 리드가 이 파일을 읽고
+#   spawn 프롬프트를 구성하는 데 참고한다.
+#   공식 문서: https://code.claude.com/docs/en/agent-teams
+#
+# _note: 워커별 모델 지정은 현재 spawn 시점 자연어로 전달한다.
+#   ("Use Sonnet for each teammate") 런타임 config에는 모델이 자동 기록된다.
+
+team:
+  name: "web-app-team"
+  description: "웹 앱 MVP 병렬 빌드 — 프론트엔드·백엔드·테스트 독립 워커"
+  version: "1.0.0"
+
+  # 팀 리드: 메인 /start-company 세션 (Opus 4.7 권장 — 아키텍처 결정)
+  # 팀 리드는 TaskList를 관리하고 방향을 결정한다.
+  # 워커들은 리드에게만 보고하지 않고 서로 직접 메시지를 주고받을 수 있다.
+
+  teammates:
+    - id: "frontend-worker"
+      description: "UI 컴포넌트, 폼, 스타일링 담당"
+      model: "claude-sonnet-4-6"
+      # templates/agents/designer.md 역할 정의 참조
+      agent_type: "designer"
+      spawn_prompt: |
+        You are the frontend-worker for {{SERVICE_NAME}}.
+        Your responsibilities:
+        - UI components, forms, and styling
+        - Design system consistency
+        - Client-side state management
+        - Responsive layout and accessibility
+        Reference: .claude/agents/designer.md for design principles.
+        Work independently on files under src/components/, src/pages/, src/styles/.
+        Do NOT touch src/api/, src/server/, or test files — those belong to other teammates.
+        When your work depends on an API contract, message backend-worker directly.
+      owned_paths:
+        - "src/components/"
+        - "src/pages/"
+        - "src/styles/"
+        - "src/hooks/"
+        - "public/"
+
+    - id: "backend-worker"
+      description: "API 라우트, DB 스키마, 인증 로직 담당"
+      model: "claude-sonnet-4-6"
+      # templates/agents/developer.md 역할 정의 참조
+      agent_type: "developer"
+      spawn_prompt: |
+        You are the backend-worker for {{SERVICE_NAME}}.
+        Your responsibilities:
+        - API routes and endpoint implementation
+        - Database schema design and migrations
+        - Authentication and authorization logic
+        - Server-side validation and error handling
+        Reference: .claude/agents/developer.md for development principles.
+        Work independently on files under src/api/, src/server/, src/db/, src/auth/.
+        Do NOT touch src/components/, src/pages/, or test files — those belong to other teammates.
+        When the API contract is ready, message frontend-worker so they can integrate.
+        No hardcoded secrets — use process.env for all credentials.
+      owned_paths:
+        - "src/api/"
+        - "src/server/"
+        - "src/db/"
+        - "src/auth/"
+        - "src/lib/"
+
+    - id: "test-worker"
+      description: "유닛·통합·Playwright E2E 테스트 담당"
+      model: "claude-sonnet-4-6"
+      # templates/agents/qa-tester.md 역할 정의 참조
+      agent_type: "qa-tester"
+      spawn_prompt: |
+        You are the test-worker for {{SERVICE_NAME}}.
+        Your responsibilities:
+        - Unit tests for utility functions and business logic
+        - Integration tests for API routes
+        - Playwright E2E tests for critical user flows
+        Reference: .claude/agents/qa-tester.md for testing principles.
+        Work independently on files under src/__tests__/, tests/, e2e/.
+        Monitor what frontend-worker and backend-worker complete, then write
+        tests against those implementations. Message teammates if you find
+        a defect — they should fix it before you mark the test as blocked.
+      owned_paths:
+        - "src/__tests__/"
+        - "tests/"
+        - "e2e/"
+        - "playwright.config.*"
+
+  # 태스크 크기 가이드라인 (공식 문서 권장)
+  task_guidelines:
+    size: "self-contained unit producing a clear deliverable (function, component, route, test file)"
+    tasks_per_teammate: "5-6 tasks keeps workers productive without excessive context switching"
+    avoid: "same-file edits by multiple teammates — assign by owned_paths above"
+
+  # 파일 충돌 방지 전략
+  isolation:
+    strategy: "owned_paths"
+    note: |
+      각 워커가 고유 경로 집합을 소유한다. 동일 파일을 두 워커가 편집하면
+      덮어쓰기 충돌이 발생한다. 경계가 불명확한 파일(예: types.ts)은
+      팀 리드가 조정하거나 공유 파일로 지정해 선착순 편집 후 메시지로 알린다.
+
+  # 권장 팀 리드 프롬프트 (start-company 세션에서 그대로 사용 가능)
+  suggested_lead_prompt: |
+    Create an agent team for {{SERVICE_NAME}} using the web-app-team preset.
+    Spawn three teammates using Sonnet for each:
+    1. frontend-worker — UI components, forms, styling (owns src/components/, src/pages/, src/styles/)
+    2. backend-worker — API routes, DB schema, auth (owns src/api/, src/server/, src/db/)
+    3. test-worker — unit, integration, Playwright E2E tests (owns tests/, e2e/)
+    Each teammate owns separate directories to prevent file conflicts.
+    Require plan approval before any teammate makes schema or auth changes.
+    Wait for all teammates to finish before synthesizing results.
