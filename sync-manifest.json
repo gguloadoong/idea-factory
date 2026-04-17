@@ -22,7 +22,11 @@
     { "src": "templates/scripts/review-summary.sh",               "dst": "scripts/review-summary.sh" },
     { "src": "templates/scripts/validate-qa-evidence.sh",         "dst": "scripts/validate-qa-evidence.sh" },
     { "src": "templates/scripts/pre-deploy-consensus.sh",         "dst": "scripts/pre-deploy-consensus.sh" },
-    { "src": "templates/scripts/update-project-docs.sh",          "dst": "scripts/update-project-docs.sh" }
+    { "src": "templates/scripts/update-project-docs.sh",          "dst": "scripts/update-project-docs.sh" },
+    { "src": "templates/mcp/supabase.json",                       "dst": ".claude/mcp/supabase.json" },
+    { "src": "templates/mcp/vercel.json",                         "dst": ".claude/mcp/vercel.json" },
+    { "src": "templates/mcp/README.md",                           "dst": ".claude/mcp/README.md" },
+    { "src": "templates/mcp/merge-example.sh",                    "dst": ".claude/mcp/merge-example.sh" }
   ],
   "computed": [
     { "generator": "merge-settings", "dst": ".claude/settings.json", "note": "base + type extension 병합 결과와 비교" }

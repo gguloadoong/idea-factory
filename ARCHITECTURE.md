@@ -225,6 +225,32 @@ idea-factory tracks Claude Code's Q1 2026 primitives and adopts them as they sta
 - Activation path: uncomment the `@.claude/rules/*` lines in `CLAUDE.md` → Claude Code loads each file as an additional context source before the session begins.
 - The scaffold flow (`install.sh`, `SKILL.md`, `phases.md`) is unchanged — rule externalization is opt-in, not default.
 
+### MCP Bundles (Supabase + Vercel Presets)
+
+`templates/mcp/` holds opt-in MCP server configuration presets for the two services
+most commonly used in idea-factory downstream projects.
+
+| File | Purpose |
+|---|---|
+| `supabase.json` | `mcpServers.supabase` entry — `@supabase/mcp-server-supabase` via npx |
+| `vercel.json` | `mcpServers.vercel` entry — `@vercel/mcp-adapter` via npx |
+| `README.md` | Korean setup guide: OAuth 2.1 rationale, merge steps, forbidden patterns |
+| `merge-example.sh` | jq-based helper to merge a preset into `.claude/settings.json` (dry-run supported) |
+
+**Security posture — OAuth 2.1 by default.**
+All `env` values in the preset files are placeholders (`${SUPABASE_ACCESS_TOKEN}`,
+`${VERCEL_API_TOKEN}`). Real tokens are injected at runtime via environment variables;
+they are never written into the preset files themselves. The OAuth 2.1 flow (RFC 8707
+Resource Indicators) issues short-lived, server-scoped tokens via a browser popup —
+eliminating the need for long-lived static keys stored in any file.
+
+**Opt-in, not scaffolded by default.**
+MCP presets are not copied by `install.sh` or `SKILL.md`. Developers merge them
+manually with `merge-example.sh` when they need Supabase or Vercel MCP access.
+All four files are classified as `managed` in `sync-manifest.json` so upstream
+improvements (e.g., new OAuth 2.1 endpoints) propagate to downstream projects via
+`sync-downstream.sh`.
+
 ### Planned Adoptions (Week 3+ backlog)
 
 - **Routines** (Anthropic, 2026-04-14): cloud-scheduled automation. One-line idea via GitHub webhook → full build without a local terminal.
