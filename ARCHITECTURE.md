@@ -189,6 +189,40 @@ baseline metric. Proven across 13 phases in market-dashboard-v5.
 
 ---
 
+## Claude Code 2026-Q1 Integrations
+
+idea-factory tracks Claude Code's Q1 2026 primitives and adopts them as they stabilize.
+
+### 1M Context as Standard (2026-03-13+)
+
+- Opus 4.6 / 4.7 and Sonnet 4.6 treat 1M tokens as the default context window at standard pricing (the prior 2x multiplier was removed).
+- Max / Team / Enterprise: on by default. Pro: opt-in via `/extra-usage`.
+- **Implication**: SCAFFOLD + BUILD phases no longer need aggressive `/compact` calls until usage exceeds ~80%. The whole generated MVP typically fits in one context.
+
+### /rewind Checkpoint
+
+- `/rewind` (shortcut: `Esc Esc`) rolls back the agent's last set of file edits within the current session.
+- Works alongside git: git provides committed history, `/rewind` provides in-session undo before commit.
+- **Implication**: autonomous ralph loops can attempt risky changes with a zero-cost undo. Recovery is 2-tier: `/rewind` first, `git reset` as fallback.
+
+### Opus 4.7 Tokenizer Inflation
+
+- Opus 4.7 (released 2026-04-16) ships a new tokenizer. The same text counts up to +35% more tokens than Opus 4.6 at the same $5 / $25 list price.
+- **Implication**: the Model Strategy (Sonnet default, Opus for architecture / RCA / deep analysis) tightens. Routine agents (`developer`, `pm`, `designer`, `qa-tester`) MUST stay on Sonnet 4.6. Gate reviewers (`architect`, `critic`, `code-reviewer`, `analyst`) run on Opus but only once per phase — not per story.
+
+### SessionStart Hook + Larger Restore Payloads
+
+- `templates/hooks/session-start-restore.sh` and `check-pending-prs.sh` fire on every new session.
+- With 1M context, restore payloads can include handoff + essence + the last 10 decisions + the current story slate — no compaction pressure at session start.
+
+### Planned Adoptions (Week 3+ backlog)
+
+- **Routines** (Anthropic, 2026-04-14): cloud-scheduled automation. One-line idea via GitHub webhook → full build without a local terminal.
+- **Agent Teams + Worktree**: parallel workers across isolated worktrees, coordinated by a team-leader session. Requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`.
+- **Plugin Marketplace**: package idea-factory as an official plugin (`anthropics/claude-plugins-official`) for one-command install.
+
+---
+
 ## Design Decision Index
 
 Each item links to the full rationale in HARNESS-GUIDE.md:
