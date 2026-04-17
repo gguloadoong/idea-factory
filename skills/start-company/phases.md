@@ -80,7 +80,13 @@ Create project at `~/{folder-name}/`:
     - `scripts/health-check.sh` — JSON health status reporter
     - `templates/workflows/tuning-session.md` → `.project/tuning-protocol.md` (parameter tuning protocol)
     - `.omc/experiments/` directory with README from `templates/experiments/README.md`
-26. `git init` + `git config core.hooksPath .githooks` + initial commit
+26. **Optional extensions** (opt-in — copy verbatim into `.claude/`; user activates as needed):
+    - `.claude/rules/` — from `templates/.claude/rules/` (commit / security / code-style / ai-regression). Activate by uncommenting `@.claude/rules/*.md` at the bottom of `CLAUDE.md`.
+    - `.claude/mcp/` — from `templates/mcp/` (Supabase + Vercel OAuth 2.1 presets). Activate by running `bash .claude/mcp/merge-example.sh` to merge entries into `.claude/settings.json`.
+    - `.claude/routines/` — from `templates/routines/` (reference templates for Claude Code Routines). Register via Claude Code UI or `/schedule` CLI; local files are reference-only.
+    - `.claude/agent-teams/` — from `templates/agent-teams/` (web-app + cron-bot team presets). Activate with `export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` before session start.
+    - `.claude/observability/` — from `templates/observability/` (masking filter rules). Activate by wiring `.claude/hooks/observability-push.sh` into PostToolUse in `.claude/settings.json` and setting `OBSERVABILITY_WEBHOOK_URL`.
+27. `git init` + `git config core.hooksPath .githooks` + initial commit
 
 **Template variable reference**:
 - `{{SERVICE_NAME}}` — service name from analysis
