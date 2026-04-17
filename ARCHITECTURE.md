@@ -279,9 +279,25 @@ Extra runs available via Settings > Billing (metered overage).
 - GitHub Issues event not yet a native trigger; bridge via GitHub Actions + API trigger
 - Each run is a fresh session; inter-run state must be passed via committed files
 
+### Agent Teams + Worktree (Parallel Workers)
+
+Shipped on `feature/#30-agent-teams`. Scaffold merged into `templates/agent-teams/`.
+
+- **Status**: scaffold shipped — see `templates/agent-teams/`
+- **Activation**: `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` (env or `settings.json`)
+- **Minimum version**: Claude Code v2.1.32+
+- **Two presets**: `web-app-team` (frontend + backend + test workers), `cron-bot-team` (logic + scheduler + monitoring workers)
+- **Runtime coordination**: teams are not pre-authored YAML configs. The team lead creates teams via natural language; runtime state is saved to `~/.claude/teams/{team-name}/config.json` automatically.
+- **Subagent reuse**: each worker references an existing `templates/agents/` definition via `agent_type`. The agent's `tools` allowlist and `model` are applied; its body is appended as additional system prompt instructions.
+- **File conflict prevention**: each worker owns a distinct set of paths (`owned_paths`). Two workers editing the same file causes overwrites — the spawn prompt must enforce boundaries.
+- **Inter-teammate messaging**: workers message each other directly (not only through the lead) via `message` (one teammate) or `broadcast` (all teammates). Costs scale with team size.
+- **Known constraint**: all teammates share one model at spawn time. Model mixing (Opus for architecture) must be handled in the main lead session via subagents, not as a teammate.
+- **Experimental warning**: API surface and behavior subject to change without notice.
+
+See `templates/agent-teams/README.md` for Korean activation guide and usage decision matrix.
+
 ### Planned Adoptions (Week 3+ backlog)
 
-- **Agent Teams + Worktree**: parallel workers across isolated worktrees, coordinated by a team-leader session. Requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`.
 - **Plugin Marketplace**: package idea-factory as an official plugin (`anthropics/claude-plugins-official`) for one-command install.
 
 ---
