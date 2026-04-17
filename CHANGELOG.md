@@ -8,14 +8,15 @@ Format follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added (shipped to main, awaiting v8.2 tag)
-- `.github/workflows/sync-downstream.yml` + `docs/sync-downstream-workflow.md` — 다운스트림 sync를 GitHub Actions `workflow_dispatch`로 실행 (#38). 수동 트리거 + dry-run 기본 + PAT 기반 권한 격리.
+- `scripts/audit-grep.sh` + `scripts/audit-analyze.py` + `docs/audit-analysis.md` (#40) — JSONL audit log 조회·분석 도구. v8 backlog item 1.4 실현. 9 sub-options grep CLI + 3 패턴(repeated-failure / frequency-anomaly / suspicious) 감지 엔진.
+- `.github/workflows/sync-downstream.yml` + `docs/sync-downstream-workflow.md` (#38) — 다운스트림 sync를 GitHub Actions `workflow_dispatch`로 실행. 수동 트리거 + dry-run 기본 + PAT 기반 권한 격리.
 - Scaffold completeness 수정 (#36) — install.sh가 `cp -R templates/.` 전체 복사로 변경, phases.md SCAFFOLD에 5개 optional extension 디렉터리 명시.
 
 ### Planned (not yet shipped)
-- v8 item 1.4: JSONL audit log grep tooling for session misbehavior analysis
 - 다운스트림 sync 자동 트리거 (v2: 템플릿 변경 머지 시 자동 check 모드)
 - 샘플 MVP 갤러리 실제 결과물 수록
 - 데모 비디오 3종 (5분 MVP / 음성+Routines 트리거 / 한국어 자율 에이전트)
+- `check-audit.sh` 스키마 확장 — 실패 감지를 위한 exit code 필드 추가 (현재 audit-analyze.py의 repeated-failure는 cmd 반복으로 근사)
 
 ---
 
