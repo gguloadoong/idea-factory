@@ -215,6 +215,16 @@ idea-factory tracks Claude Code's Q1 2026 primitives and adopts them as they sta
 - `templates/hooks/session-start-restore.sh` and `check-pending-prs.sh` fire on every new session.
 - With 1M context, restore payloads can include handoff + essence + the last 10 decisions + the current story slate — no compaction pressure at session start.
 
+### .claude/rules/ Pattern (Opt-in Rule Externalization)
+
+- `templates/.claude/rules/{commit,security,code-style,ai-regression}.md` ship as starter rules that downstream projects can adopt as-is or adapt freely.
+- Projects import rules via `@.claude/rules/*.md` references inside `CLAUDE.md` when the 80-line visible body would otherwise be exceeded.
+- The four starters cover the highest-impact rule categories: commit discipline, secret hygiene, language-specific code style, and AI regression prevention.
+- Classification: `customized` in `sync-manifest.json` — sync does not overwrite downstream edits, so teams can diverge without drift warnings.
+- Why externalize instead of expanding `CLAUDE.md`: the 80-line limit is enforced by `check-claudemd-size.sh` and is a deliberate UX constraint (model-facing context budget). HTML comments in `CLAUDE.md.tmpl` are invisible to the model, so the import block costs zero tokens until uncommented.
+- Activation path: uncomment the `@.claude/rules/*` lines in `CLAUDE.md` → Claude Code loads each file as an additional context source before the session begins.
+- The scaffold flow (`install.sh`, `SKILL.md`, `phases.md`) is unchanged — rule externalization is opt-in, not default.
+
 ### Planned Adoptions (Week 3+ backlog)
 
 - **Routines** (Anthropic, 2026-04-14): cloud-scheduled automation. One-line idea via GitHub webhook → full build without a local terminal.
