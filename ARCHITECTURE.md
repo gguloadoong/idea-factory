@@ -251,9 +251,36 @@ All four files are classified as `managed` in `sync-manifest.json` so upstream
 improvements (e.g., new OAuth 2.1 endpoints) propagate to downstream projects via
 `sync-downstream.sh`.
 
+### Routines (Cloud Automation)
+
+Shipped 2026-04-14 as research preview. Scaffold merged on `feature/#29-routines-integration`.
+
+**What it enables**: A CEO posts a one-line idea to Discord → a GitHub Issue is created →
+a Claude Code Routine fires on Anthropic-managed cloud infrastructure → `/start-company`
+runs without any local terminal → PR created → Discord notification sent back.
+
+**Status**: scaffold shipped — reference template and guides in `templates/routines/`.
+
+**When to use**:
+- Async idea intake: CEO submits ideas anytime; Claude processes them on the next trigger
+- Unattended overnight builds: schedule a nightly routine to advance MVP phases
+- CI/CD hooks: fire a routine from deploy pipelines for smoke tests or alert triage
+
+**Tier quotas** (daily run limit): Pro 5 / Max 15 / Team+Enterprise 25.
+Extra runs available via Settings > Billing (metered overage).
+
+**Files**:
+- `templates/routines/idea-to-mvp.yaml` — annotated routine configuration reference
+- `templates/routines/README.md` — Korean quick-start guide
+- `docs/routines-integration.md` — end-to-end integration guide (English + Korean)
+
+**Constraints**:
+- Research preview: schema, API surface, and limits subject to change
+- GitHub Issues event not yet a native trigger; bridge via GitHub Actions + API trigger
+- Each run is a fresh session; inter-run state must be passed via committed files
+
 ### Planned Adoptions (Week 3+ backlog)
 
-- **Routines** (Anthropic, 2026-04-14): cloud-scheduled automation. One-line idea via GitHub webhook → full build without a local terminal.
 - **Agent Teams + Worktree**: parallel workers across isolated worktrees, coordinated by a team-leader session. Requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`.
 - **Plugin Marketplace**: package idea-factory as an official plugin (`anthropics/claude-plugins-official`) for one-command install.
 
