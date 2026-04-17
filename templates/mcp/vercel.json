@@ -1,0 +1,16 @@
+{
+  "_comment": "Vercel MCP server preset. DO NOT commit real tokens. Use OAuth 2.1 browser-based authorization flow — not static API keys. See README.md for setup instructions.",
+  "description": "Vercel MCP server — OAuth 2.1 browser authorization flow (RFC 8707 Resource Indicators). Users authorize via browser; no long-lived token needed in this file.",
+  "mcpServers": {
+    "vercel": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@vercel/mcp-adapter@latest"
+      ],
+      "env": {
+        "VERCEL_API_TOKEN": "${VERCEL_API_TOKEN}"
+      }
+    }
+  }
+}
