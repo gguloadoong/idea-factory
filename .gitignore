@@ -2,3 +2,6 @@
 .omc/
 node_modules/
 .env*
+*.bak
+*.bak.*
+*.tmp
