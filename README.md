@@ -229,19 +229,71 @@ That's it. The system will:
 
 ```
 idea-factory/
-├── skills/start-company/    # The trigger
-│   ├── SKILL.md             # v6.1 execution flow
-│   └── HARNESS-GUIDE.md     # Design decisions & evidence
-├── templates/               # Pre-built, reusable
-│   ├── CLAUDE.md.tmpl       # Project constitution
-│   ├── settings.json        # Permissions + hooks
-│   ├── agents/              # PM, Developer, Designer
-│   ├── hooks/               # check-quality, check-careful, check-safety
-│   ├── documents/           # PRD, essence, CONTRACT, handoff template
-│   └── scripts/             # codex-review-gate.sh (cross-model review)
-├── install.sh               # One-command installer
-└── docs/ko/                 # Korean documentation
+├── skills/start-company/         # The trigger (/start-company)
+│   ├── SKILL.md                   # execution flow (current: v7.1)
+│   └── HARNESS-GUIDE.md           # design decisions + evidence (22 KB)
+│
+├── templates/                    # Scaffold copied into each new project
+│   │                              # ── Core (every install gets these) ──
+│   ├── CLAUDE.md.tmpl             # project constitution (80-line limit)
+│   ├── settings.json              # permissions + deny-list (safety baseline)
+│   ├── agents/                    # 7 roles: pm · developer · designer · architect · critic · code-reviewer · qa-tester
+│   ├── hooks/                     # 18+ hooks: safety / quality / governance / loop-breaker
+│   ├── documents/                 # PRD · essence · CONTRACT · handoff · quality-baseline
+│   ├── scripts/                   # codex-review-gate · copy-drift · contract · temporal-lint
+│   ├── .github/workflows/         # CI + PR labeling
+│   │                              # ── Advanced (opt-in patterns) ──
+│   ├── contract-rules/            # CONTRACT FAQ rules (drift guardrails)
+│   ├── gate-presets/              # 6-Gate Deploy Consensus configs
+│   ├── gate-rules.yml             # per-stage gate rules
+│   ├── ratchet.yml.tmpl           # Quality Ratchet (regression floor)
+│   ├── protected-files.yml        # protected-files hook allow-list
+│   ├── .protected-files.tmpl      # (template of above for downstreams)
+│   ├── handoff-checklist.md.tmpl  # phase handoff checklist
+│   ├── research-report.md.tmpl    # researcher agent output template
+│   ├── experiments/               # numerical tuning harness (v8)
+│   ├── cron-bot/                  # scheduled bot scaffold (v8)
+│   ├── settings-extensions/       # per-project-type settings overlays
+│   ├── lints/temporal-leakage/    # date/time hardcoding lint
+│   ├── workflows/                 # opinionated ralph/ulw workflows
+│   ├── .githooks/                 # pre-commit hooks for downstreams
+│   ├── .coderabbit.yaml           # CodeRabbit review config
+│   ├── COPIED-FROM.md.tmpl        # template provenance stamp
+│   └── vercel.json                # Vercel preview-deployment safety defaults
+│
+├── scripts/                      # Meta-utilities (NOT copied to downstreams)
+│   ├── sync-downstream.sh         # push template updates to N downstream repos
+│   ├── sync-lib.py                # sync library
+│   ├── audit-backlog.py           # v8 backlog tracking
+│   ├── check-contract.sh          # CONTRACT FAQ drift check
+│   ├── check-copy-drift.sh        # template-vs-copy drift check
+│   ├── lint-temporal-leakage.sh   # date lint
+│   ├── merge-settings.sh          # settings.json merge helper
+│   ├── record-failure.sh          # failure capture for learning layer
+│   ├── run-gate.sh                # gate orchestrator
+│   ├── tuning-gate.sh             # numerical tuning gate
+│   └── validate-handoff.sh        # handoff validator
+│
+├── sync-manifest.json            # managed / computed / customized classification
+├── downstream-registry.json      # downstream repos this factory tracks
+├── install.sh                    # one-command installer
+├── tests/                        # harness invariant tests
+│
+├── docs/                         # project documentation
+│   ├── ko/                        # 한국어 가이드
+│   └── research/                  # internal research memos
+│
+├── CLAUDE.md                     # working-in-this-repo rules (Claude Code)
+├── AGENTS.md                     # OMC entry point
+├── ARCHITECTURE.md               # system architecture overview
+├── CHANGELOG.md                  # version history
+├── CONTRIBUTING.md               # contribution guide
+├── SECURITY.md                   # security policy
+├── CODE_OF_CONDUCT.md            # community standards
+└── LICENSE                       # MIT
 ```
+
+For the rationale behind every design decision, see [HARNESS-GUIDE.md](skills/start-company/HARNESS-GUIDE.md).
 
 ### Design Decisions
 
