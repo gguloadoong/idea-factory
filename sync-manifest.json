@@ -34,7 +34,10 @@
     { "src": "templates/agent-teams/README.md",                   "dst": ".claude/agent-teams/README.md" },
     { "src": "templates/hooks/observability-push.sh",            "dst": ".claude/hooks/observability-push.sh" },
     { "src": "templates/observability/README.md",                "dst": ".claude/observability/README.md" },
-    { "src": "templates/observability/filter-rules.yaml",        "dst": ".claude/observability/filter-rules.yaml" }
+    { "src": "templates/observability/filter-rules.yaml",        "dst": ".claude/observability/filter-rules.yaml" },
+    { "src": "scripts/audit-grep.sh",                           "dst": "scripts/audit-grep.sh" },
+    { "src": "scripts/audit-analyze.py",                        "dst": "scripts/audit-analyze.py" },
+    { "src": "docs/audit-analysis.md",                          "dst": "docs/audit-analysis.md" }
   ],
   "computed": [
     { "generator": "merge-settings", "dst": ".claude/settings.json", "note": "base + type extension 병합 결과와 비교" }
