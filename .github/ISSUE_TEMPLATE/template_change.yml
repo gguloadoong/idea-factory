@@ -1,0 +1,44 @@
+name: 🏗️ 템플릿 추가/변경
+description: 새 agent · hook · skill · document template 제안
+title: "[TEMPLATE] "
+labels: ["template", "design"]
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: 템플릿 종류
+      options:
+        - agent (templates/agents/)
+        - hook (templates/hooks/)
+        - skill (skills/)
+        - document template (templates/documents/)
+        - settings / gate / ratchet
+        - 기타
+    validations:
+      required: true
+  - type: textarea
+    id: rationale
+    attributes:
+      label: 왜 이게 필요한가요?
+      description: 근거 — 반복된 실패 사례, field-report, 다운스트림 공통 이슈 등
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 근거 링크
+      placeholder: 관련 Issue/PR, 또는 외부 레퍼런스 링크
+  - type: textarea
+    id: propagation
+    attributes:
+      label: 다운스트림 전파 계획
+      description: sync-manifest.json 갱신, sync-downstream.sh 실행, 단계적 롤아웃 등
+    validations:
+      required: true
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: 확인
+      options:
+        - label: 이 변경이 기존 80-line CLAUDE.md 제약, 4-reviewer gate, essence.md 철학과 충돌하지 않음을 확인
+          required: true

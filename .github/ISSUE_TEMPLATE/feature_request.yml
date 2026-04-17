@@ -1,0 +1,42 @@
+name: ✨ 기능 요청
+description: 새로운 동작·개선 제안
+title: "[FEAT] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 어떤 문제를 해결하나요?
+      description: 현재 불편한 점이나 빠진 기능
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: 제안하는 해결책
+      description: 구체적일수록 좋습니다. API/CLI 스케치나 예시 커맨드도 환영.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 검토한 다른 대안
+      placeholder: 이미 시도해본 접근이나 비슷한 오픈소스 도구
+  - type: dropdown
+    id: downstream-impact
+    attributes:
+      label: 다운스트림 영향
+      description: 이 변경이 기존 다운스트림 레포에 어떤 영향을 주나요?
+      options:
+        - 없음 (이 레포만 변경)
+        - sync-downstream 필요 (템플릿 업데이트 전파 필요)
+        - 파괴적 변경 (downstream 마이그레이션 필요)
+    validations:
+      required: true
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: 확인
+      options:
+        - label: ARCHITECTURE.md / HARNESS-GUIDE.md를 확인하여 기존 설계와 충돌하지 않는지 살펴봤습니다
+          required: true

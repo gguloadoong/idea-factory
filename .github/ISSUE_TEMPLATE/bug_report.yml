@@ -1,0 +1,66 @@
+name: 🐛 버그 리포트
+description: 의도와 다르게 동작하는 상황을 알려주세요
+title: "[BUG] "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        버그 리포트 감사합니다. 아래 항목을 채워주시면 빠르게 재현·수정할 수 있습니다.
+  - type: dropdown
+    id: version
+    attributes:
+      label: idea-factory 버전
+      options:
+        - main (latest)
+        - v7.1
+        - v7
+        - v6.1
+        - 모르겠음
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 무슨 일이 일어났나요?
+      description: 기대 동작과 실제 동작의 차이
+      placeholder: |
+        예: `/start-company ...` 실행 후 SCAFFOLD 단계에서 멈춤
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: 재현 순서
+      placeholder: |
+        1. `bash install.sh`
+        2. `claude`
+        3. `/start-company ...`
+        4. ...
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: 로그 / 에러 메시지
+      description: 있다면 붙여주세요 (민감 정보는 제거)
+      render: shell
+  - type: input
+    id: claude-version
+    attributes:
+      label: Claude Code 버전
+      placeholder: "claude --version 결과"
+  - type: input
+    id: os-node
+    attributes:
+      label: OS / Node 버전
+      placeholder: "macOS 15 / Node 20"
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: 확인
+      options:
+        - label: 기존 Issue/Discussion에서 동일 사례를 검색했습니다
+          required: true
+        - label: 로그·스크린샷에 `.env` 값이나 API 키가 포함되지 않았습니다
+          required: true

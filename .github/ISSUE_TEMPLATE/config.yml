@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 질문 / 아이디어 (Discussions)
+    url: https://github.com/gguloadoong/idea-factory/discussions
+    about: 버그·기능 요청이 아닌 질문이나 아이디어는 Discussions에서 나눠주세요.
+  - name: 🔒 보안 취약점
+    url: https://github.com/gguloadoong/idea-factory/security/advisories/new
+    about: 보안 이슈는 Public Issue가 아닌 Security Advisory로 비공개 제보.
