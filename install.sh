@@ -24,21 +24,22 @@ else
   }
 fi
 
-# Create directories
+# Create target directories
 mkdir -p "$SKILL_DIR"
-mkdir -p "$TEMPLATE_DIR"/{agents,hooks,documents}
+mkdir -p "$TEMPLATE_DIR"
 
-# Install skill
+# Install skill (entry point + Skills 2.0 progressive-disclosure detail files)
 cp "$SOURCE_DIR/skills/start-company/SKILL.md" "$SKILL_DIR/SKILL.md"
+[ -f "$SOURCE_DIR/skills/start-company/phases.md" ] && cp "$SOURCE_DIR/skills/start-company/phases.md" "$SKILL_DIR/phases.md"
+[ -f "$SOURCE_DIR/skills/start-company/agents.md" ] && cp "$SOURCE_DIR/skills/start-company/agents.md" "$SKILL_DIR/agents.md"
 echo "   ✓ Skill installed: /start-company"
 
-# Install templates
-cp "$SOURCE_DIR/templates/CLAUDE.md.tmpl" "$TEMPLATE_DIR/"
-cp "$SOURCE_DIR/templates/settings.json" "$TEMPLATE_DIR/"
-cp "$SOURCE_DIR/templates/agents/"*.md "$TEMPLATE_DIR/agents/"
-cp "$SOURCE_DIR/templates/hooks/"*.sh "$TEMPLATE_DIR/hooks/"
-cp "$SOURCE_DIR/templates/documents/"*.tmpl "$TEMPLATE_DIR/documents/"
-chmod +x "$TEMPLATE_DIR/hooks/"*.sh
+# Install templates (full tree — auto-picks up new subdirectories like
+# .claude/rules, mcp, routines, agent-teams, observability)
+cp -R "$SOURCE_DIR/templates/." "$TEMPLATE_DIR/"
+
+# Make all shell scripts executable (hooks, cron-bot scripts, mcp helpers, etc.)
+find "$TEMPLATE_DIR" -type f -name '*.sh' -exec chmod +x {} \;
 echo "   ✓ Templates installed: ~/.claude/templates/company/"
 
 # Cleanup temp dir if cloned
