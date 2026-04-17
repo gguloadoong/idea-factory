@@ -5,11 +5,78 @@ Format follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
-## [Unreleased] — v8.x future work
+## [Unreleased]
 
-Planned items not yet shipped:
 - v8 item 1.4: JSONL audit log grep tooling for session misbehavior analysis
-- Additional downstream sync improvements
+- 다운스트림 sync 자동 전파 훅 (현재 manual trigger)
+- 샘플 MVP 갤러리 실제 결과물 수록
+- 데모 비디오 3종 (5분 MVP / 음성+Routines 트리거 / 한국어 자율 에이전트)
+
+---
+
+## [v8.1] — 2026-04-17
+
+**Plugin Marketplace Ready**. Claude Code 2026-Q1 생태계 통합 + 공개 레포 거버넌스 완비 + 다국어 문서.
+
+PR 7건 (#25 · #26 · #27 · #32 · #33 · #34 · #35) + main 직접 커밋 12건.
+
+### Added
+
+**루트 거버넌스 (공개 레포 표준)**
+- `LICENSE` (MIT) — README 뱃지와 실제 파일 정합
+- `CLAUDE.md`, `AGENTS.md`, `ARCHITECTURE.md` — 자기 자신 dogfooding
+- `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`
+- `.github/ISSUE_TEMPLATE/{bug_report,feature_request,template_change,config}.yml`
+- `.github/PULL_REQUEST_TEMPLATE.md`
+
+**Claude Code 2026-Q1 생태계 통합**
+- **Skills 2.0** (#22): `skills/start-company/SKILL.md` 17KB → 3.1KB 분할 + `phases.md` + `agents.md` + `allowed-tools` frontmatter (progressive disclosure)
+- **`.claude/rules/` 패턴** (#23): `templates/.claude/rules/` 스캐폴드 (commit / security / code-style / ai-regression) + `@import` opt-in
+- **MCP 번들** (#24): `templates/mcp/` — Supabase + Vercel 프리셋, OAuth 2.1 + RFC 8707 Resource Indicators
+- **Plugin Marketplace** (#28): `.claude-plugin/plugin.json` + 마켓 리스팅 README + 제출 체크리스트
+- **Routines** (#29): `templates/routines/` — 2026-04-14 출시 클라우드 자동화 참고 템플릿 + 디스코드 웹훅 브릿지 가이드
+- **Agent Teams** (#30): `templates/agent-teams/` — web-app / cron-bot 3-워커 프리셋 + `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` 활성화
+- **Multi-agent Observability** (#31): `templates/hooks/observability-push.sh` (PostToolUse, exit-0) + Discord / Telegram 푸시 + 8종 시크릿 마스킹
+
+**문서 확장**
+- `CHANGELOG.md` — Keep-a-Changelog 1.1.0 포맷 독립 파일 (HARNESS-GUIDE 내부에서 분리)
+- `docs/README.md` — docs/ 디렉터리 인덱스
+- `docs/ko/README.md` — 영어 수준으로 확장 (2.8 KB → 16.5 KB, 15 섹션 한국어화)
+- `docs/plugin-submission-checklist.md` — 공식 + 커뮤니티 마켓플레이스 제출 절차
+- `docs/routines-integration.md` — 디스코드 → Routine → PR end-to-end 가이드 (318줄 한·영)
+- `docs/awesome-list-entry.md` — 5종 awesome-list 제출 초안
+- `examples/README.md` — 샘플 MVP 갤러리 수록 기준 + 기여 템플릿
+- `ARCHITECTURE.md` "Claude Code 2026-Q1 Integrations" 섹션: 1M context / /rewind / Opus 4.7 토크나이저 / Routines / Agent Teams / Observability / .claude/rules / MCP Bundles
+
+### Changed
+
+- `install.sh` 모델 버전 갱신: `claude-opus-4-6` → `claude-opus-4-7` (2026-04-16 출시)
+- `README.md` "What's Inside" 트리 — 실제 `templates/` 구조 반영 (10+ 누락 항목 복구, Core / Advanced 구분)
+- `templates/CLAUDE.md.tmpl` 최하단에 `@.claude/rules/*.md` 주석 처리 opt-in 예시 추가 (80-줄 제약 유지)
+- `sync-manifest.json`: +14 managed entries (rules / mcp / routines / agent-teams / observability)
+- `.claude-plugin/plugin.json` version: `8.0.0` → `8.1.0`
+
+### Removed
+
+- `templates/agents/*.md.bak` 3종, `templates/documents/*.tmpl.bak` 2종, `templates/hooks/*.sh.bak*` 3종 — 원본과 SHA 동일한 순수 중복
+- `docs/plans/v8-backlog.md`, `docs/field-reports/` — 내부 기획·인시던트 포스트모템을 비공개 로컬 저장소로 이전
+- Stale merged feature branches 5개 원격 정리
+
+### Security
+
+- `LICENSE` 파일 명시 — GitHub API `license` 필드 `null` 상태 해소
+- `.gitignore` 확장: `*.bak`, `*.bak.*`, `*.tmp` — 백업 파일 재발 방지
+- MCP 프리셋: OAuth 2.1 + PKCE + Resource Indicators (RFC 8707) 기본 — 하드코딩 API 키 0건
+- Observability 훅: PostToolUse 전용 (exit 0 invariant 3중 보호) + 8종 시크릿 마스킹 (AWS / sk- / ghp_ / xoxb- / AIza / Bearer / password / email / placeholder)
+- **git filter-repo로 docs/plans + docs/field-reports를 전체 히스토리에서 완전 삭제** — git log 조회로도 노출 불가
+
+### GitHub Repository Meta
+
+- `license`: `null` → `MIT`
+- `is_template`: `false` → `true` (**Use this template** 버튼 활성화)
+- `topics`: `[]` → `ai-agents · autonomous-builder · claude-code · korean · llm-orchestration · mvp-generator · startup-factory · template-repository`
+- `homepage`: `null` → `https://github.com/gguloadoong/idea-factory#install`
+- Repository description 최신화
 
 ---
 
@@ -127,4 +194,5 @@ MVP-First 재설계. Ralph 상태머신 도입. 템플릿 기반 스캐폴딩.
 
 ---
 
-[Unreleased]: https://github.com/gguloadoong/idea-factory/compare/HEAD...HEAD
+[Unreleased]: https://github.com/gguloadoong/idea-factory/compare/v8.1.0...HEAD
+[v8.1]: https://github.com/gguloadoong/idea-factory/releases/tag/v8.1.0
