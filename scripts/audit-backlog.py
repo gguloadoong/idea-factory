@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """audit-backlog.py — v8 백로그 상태 감사 스크립트
 
-idea-factory 의 docs/plans/v8-backlog.md 에 기록된 상태와
-실제 GitHub PR/Issue 상태 + 파일 존재 여부를 크로스체크.
+백로그 마크다운에 기록된 상태와 실제 GitHub PR/Issue 상태 + 파일 존재 여부를
+크로스체크. v8.1 이후 백로그 원본은 공개 레포에서 비공개 로컬로 이전됨 —
+이 스크립트는 `IDEA_FACTORY_BACKLOG_PATH` 환경변수로 그 경로를 받는다.
 
 Usage:
-  python3 scripts/audit-backlog.py              # drift 리포트
+  IDEA_FACTORY_BACKLOG_PATH=~/private/v8-backlog.md python3 scripts/audit-backlog.py
   python3 scripts/audit-backlog.py --fix        # backlog 자동 갱신
   python3 scripts/audit-backlog.py --json       # JSON 출력
 """
@@ -19,7 +20,8 @@ from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-BACKLOG = ROOT / "docs" / "plans" / "v8-backlog.md"
+_env_path = os.environ.get("IDEA_FACTORY_BACKLOG_PATH")
+BACKLOG = Path(_env_path).expanduser() if _env_path else ROOT / "docs" / "plans" / "v8-backlog.md"
 
 # ── Item registry ────────────────────────────────────────────────
 # (id, name, pr_number, issue_number, verification_files)
@@ -170,6 +172,19 @@ def main():
         elif arg in ("-h", "--help"):
             print(__doc__)
             return
+
+    if not BACKLOG.exists():
+        print()
+        print("백로그 파일을 찾을 수 없습니다:")
+        print(f"  {BACKLOG}")
+        print()
+        print("v8.1 이후 백로그 원본은 비공개 로컬 위치로 이전되었습니다.")
+        print("아래 환경변수에 비공개 백로그 경로를 지정해 다시 실행하세요:")
+        print()
+        print("  IDEA_FACTORY_BACKLOG_PATH=~/private/v8-backlog.md \\")
+        print("    python3 scripts/audit-backlog.py")
+        print()
+        sys.exit(0)
 
     backlog_content = BACKLOG.read_text()
 

@@ -7,16 +7,30 @@ Format follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-### Added (shipped to main, awaiting v8.2 tag)
+### Planned
+- 다운스트림 sync 자동 트리거 (v2: 템플릿 변경 머지 시 자동 check 모드)
+- `check-audit.sh` 스키마 확장 — 실패 감지를 위한 exit code 필드 추가 (현재 audit-analyze.py의 repeated-failure는 cmd 반복으로 근사)
+- 샘플 MVP 갤러리 실제 결과물 수록
+- 데모 비디오 3종 (5분 MVP / 음성+Routines 트리거 / 한국어 자율 에이전트)
+
+---
+
+## [v8.2] — 2026-04-26
+
+**Audit toolchain + Downstream sync workflow 정착**. v8.1 이후 머지된 운영 도구 3건을 묶어 릴리스.
+
+### Added
 - `scripts/audit-grep.sh` + `scripts/audit-analyze.py` + `docs/audit-analysis.md` (#40) — JSONL audit log 조회·분석 도구. v8 backlog item 1.4 실현. 9 sub-options grep CLI + 3 패턴(repeated-failure / frequency-anomaly / suspicious) 감지 엔진.
 - `.github/workflows/sync-downstream.yml` + `docs/sync-downstream-workflow.md` (#38) — 다운스트림 sync를 GitHub Actions `workflow_dispatch`로 실행. 수동 트리거 + dry-run 기본 + PAT 기반 권한 격리.
 - Scaffold completeness 수정 (#36) — install.sh가 `cp -R templates/.` 전체 복사로 변경, phases.md SCAFFOLD에 5개 optional extension 디렉터리 명시.
 
-### Planned (not yet shipped)
-- 다운스트림 sync 자동 트리거 (v2: 템플릿 변경 머지 시 자동 check 모드)
-- 샘플 MVP 갤러리 실제 결과물 수록
-- 데모 비디오 3종 (5분 MVP / 음성+Routines 트리거 / 한국어 자율 에이전트)
-- `check-audit.sh` 스키마 확장 — 실패 감지를 위한 exit code 필드 추가 (현재 audit-analyze.py의 repeated-failure는 cmd 반복으로 근사)
+### Changed
+- `scripts/audit-backlog.py` — `IDEA_FACTORY_BACKLOG_PATH` 환경변수로 백로그 파일 위치 override 가능. 파일 부재 시 graceful skip + 안내 메시지 (v8.1에서 `docs/plans/v8-backlog.md`가 비공개 로컬로 이전된 후속 정합성 수정).
+- `.claude-plugin/plugin.json` version: `8.1.0` → `8.2.0`
+
+### Repo Hygiene
+- Stale 브랜치 정리 — 원격 10개(`origin/feature/#22~#40`) prune + 로컬 5개(`#11/#13/#16/#17/#20`) 삭제
+- Issue #6 close — Wave 1 묶음 PR 제안이었으나 1.2/1.3/2.5 모두 v8.0 (42dda7d)에 이미 착지로 확인되어 stale로 판정
 
 ---
 
